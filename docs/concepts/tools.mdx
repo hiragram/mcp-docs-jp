@@ -1,42 +1,42 @@
 ---
-title: "Tools"
-description: "Enable LLMs to perform actions through your server"
+title: "ツール"
+description: "LLMがサーバーを通じてアクションを実行できるようにする"
 ---
 
-Tools are a powerful primitive in the Model Context Protocol (MCP) that enable servers to expose executable functionality to clients. Through tools, LLMs can interact with external systems, perform computations, and take actions in the real world.
+ツールはModel Context Protocol (MCP)の強力なプリミティブで、サーバーがクライアントに実行可能な機能を公開できるようにします。ツールを通じて、LLMは外部システムと対話し、計算を実行し、現実世界でアクションを起こすことができます。
 
 <Note>
-  Tools are designed to be **model-controlled**, meaning that tools are exposed from servers to clients with the intention of the AI model being able to automatically invoke them (with a human in the loop to grant approval).
+  ツールは**モデル制御**を想定して設計されています。つまり、ツールはサーバーからクライアントに公開され、AIモデルが自動的に呼び出せるようになっています（人間の承認ループを介して）。
 </Note>
 
-## Overview
+## 概要
 
-Tools in MCP allow servers to expose executable functions that can be invoked by clients and used by LLMs to perform actions. Key aspects of tools include:
+MCPのツールは、サーバーがクライアントに公開できる実行可能な関数で、LLMがアクションを実行するために使用できます。ツールの主な側面は以下の通りです:
 
-- **Discovery**: Clients can list available tools through the `tools/list` endpoint
-- **Invocation**: Tools are called using the `tools/call` endpoint, where servers perform the requested operation and return results
-- **Flexibility**: Tools can range from simple calculations to complex API interactions
+- **ディスカバリー**: クライアントは`tools/list`エンドポイントを通じて利用可能なツールを一覧表示できます
+- **呼び出し**: ツールは`tools/call`エンドポイントを使用して呼び出され、サーバーは要求された操作を実行して結果を返します
+- **柔軟性**: ツールは単純な計算から複雑なAPI連携まで幅広い用途に使用できます
 
-Like [resources](/docs/concepts/resources), tools are identified by unique names and can include descriptions to guide their usage. However, unlike resources, tools represent dynamic operations that can modify state or interact with external systems.
+[リソース](/docs/concepts/resources)と同様に、ツールは一意の名前で識別され、使用方法をガイドする説明を含めることができます。ただし、リソースとは異なり、ツールは状態を変更したり外部システムと対話したりできる動的な操作を表します。
 
-## Tool definition structure
+## ツール定義の構造
 
-Each tool is defined with the following structure:
+各ツールは以下の構造で定義されます:
 
 ```typescript
 {
-  name: string;          // Unique identifier for the tool
-  description?: string;  // Human-readable description
-  inputSchema: {         // JSON Schema for the tool's parameters
+  name: string;          // ツールの一意な識別子
+  description?: string;  // 人間が読める説明文
+  inputSchema: {         // ツールパラメータのJSONスキーマ
     type: "object",
-    properties: { ... }  // Tool-specific parameters
+    properties: { ... }  // ツール固有のパラメータ
   }
 }
 ```
 
-## Implementing tools
+## ツールの実装例
 
-Here's an example of implementing a basic tool in an MCP server:
+以下はMCPサーバーで基本的なツールを実装する例です:
 
 <Tabs>
   <Tab title="TypeScript">
@@ -50,12 +50,12 @@ Here's an example of implementing a basic tool in an MCP server:
       }
     });
 
-    // Define available tools
+    // 利用可能なツールを定義
     server.setRequestHandler(ListToolsRequestSchema, async () => {
       return {
         tools: [{
           name: "calculate_sum",
-          description: "Add two numbers together",
+          description: "2つの数値を加算します",
           inputSchema: {
             type: "object",
             properties: {
@@ -68,7 +68,7 @@ Here's an example of implementing a basic tool in an MCP server:
       };
     });
 
-    // Handle tool execution
+    // ツール実行を処理
     server.setRequestHandler(CallToolRequestSchema, async (request) => {
       if (request.params.name === "calculate_sum") {
         const { a, b } = request.params.arguments;
@@ -81,7 +81,7 @@ Here's an example of implementing a basic tool in an MCP server:
           ]
         };
       }
-      throw new Error("Tool not found");
+      throw new Error("ツールが見つかりません");
     });
     ```
   </Tab>
@@ -94,7 +94,7 @@ Here's an example of implementing a basic tool in an MCP server:
         return [
             types.Tool(
                 name="calculate_sum",
-                description="Add two numbers together",
+                description="2つの数値を加算します",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -116,23 +116,23 @@ Here's an example of implementing a basic tool in an MCP server:
             b = arguments["b"]
             result = a + b
             return [types.TextContent(type="text", text=str(result))]
-        raise ValueError(f"Tool not found: {name}")
+        raise ValueError(f"ツールが見つかりません: {name}")
     ```
   </Tab>
 </Tabs>
 
-## Example tool patterns
+## ツールパターンの例
 
-Here are some examples of types of tools that a server could provide:
+サーバーが提供できるツールの種類の例:
 
-### System operations
+### システム操作
 
-Tools that interact with the local system:
+ローカルシステムと対話するツール:
 
 ```typescript
 {
   name: "execute_command",
-  description: "Run a shell command",
+  description: "シェルコマンドを実行します",
   inputSchema: {
     type: "object",
     properties: {
@@ -143,14 +143,14 @@ Tools that interact with the local system:
 }
 ```
 
-### API integrations
+### API連携
 
-Tools that wrap external APIs:
+外部APIをラップするツール:
 
 ```typescript
 {
   name: "github_create_issue",
-  description: "Create a GitHub issue",
+  description: "GitHubのissueを作成します",
   inputSchema: {
     type: "object",
     properties: {
@@ -162,14 +162,14 @@ Tools that wrap external APIs:
 }
 ```
 
-### Data processing
+### データ処理
 
-Tools that transform or analyze data:
+データを変換または分析するツール:
 
 ```typescript
 {
   name: "analyze_csv",
-  description: "Analyze a CSV file",
+  description: "CSVファイルを分析します",
   inputSchema: {
     type: "object",
     properties: {
@@ -185,78 +185,78 @@ Tools that transform or analyze data:
 }
 ```
 
-## Best practices
+## ベストプラクティス
 
-When implementing tools:
+ツールを実装する際のベストプラクティス:
 
-1. Provide clear, descriptive names and descriptions
-2. Use detailed JSON Schema definitions for parameters
-3. Include examples in tool descriptions to demonstrate how the model should use them
-4. Implement proper error handling and validation
-5. Use progress reporting for long operations
-6. Keep tool operations focused and atomic
-7. Document expected return value structures
-8. Implement proper timeouts
-9. Consider rate limiting for resource-intensive operations
-10. Log tool usage for debugging and monitoring
+1. 明確で説明的な名前と説明を提供する
+2. パラメータの詳細なJSONスキーマ定義を使用する
+3. モデルがツールを使用する方法を示す例を説明に含める
+4. 適切なエラー処理と検証を実装する
+5. 長時間の操作には進捗報告を使用する
+6. ツール操作を焦点を絞ってアトミックに保つ
+7. 期待される戻り値の構造を文書化する
+8. 適切なタイムアウトを実装する
+9. リソース集約的な操作にはレート制限を考慮する
+10. デバッグと監視のためにツール使用をログに記録する
 
-## Security considerations
+## セキュリティ考慮事項
 
-When exposing tools:
+ツールを公開する際のセキュリティ考慮事項:
 
-### Input validation
+### 入力検証
 
-- Validate all parameters against the schema
-- Sanitize file paths and system commands
-- Validate URLs and external identifiers
-- Check parameter sizes and ranges
-- Prevent command injection
+- スキーマに対して全てのパラメータを検証する
+- ファイルパスとシステムコマンドをサニタイズする
+- URLと外部識別子を検証する
+- パラメータのサイズと範囲を確認する
+- コマンドインジェクションを防ぐ
 
-### Access control
+### アクセス制御
 
-- Implement authentication where needed
-- Use appropriate authorization checks
-- Audit tool usage
-- Rate limit requests
-- Monitor for abuse
+- 必要に応じて認証を実装する
+- 適切な認可チェックを使用する
+- ツール使用を監査する
+- リクエストをレート制限する
+- 悪用を監視する
 
-### Error handling
+### エラー処理
 
-- Don't expose internal errors to clients
-- Log security-relevant errors
-- Handle timeouts appropriately
-- Clean up resources after errors
-- Validate return values
+- 内部エラーをクライアントに公開しない
+- セキュリティ関連のエラーをログに記録する
+- タイムアウトを適切に処理する
+- エラー後にリソースをクリーンアップする
+- 戻り値を検証する
 
-## Tool discovery and updates
+## ツールのディスカバリーと更新
 
-MCP supports dynamic tool discovery:
+MCPは動的なツールディスカバリーをサポートしています:
 
-1. Clients can list available tools at any time
-2. Servers can notify clients when tools change using `notifications/tools/list_changed`
-3. Tools can be added or removed during runtime
-4. Tool definitions can be updated (though this should be done carefully)
+1. クライアントはいつでも利用可能なツールを一覧表示できます
+2. サーバーは`notifications/tools/list_changed`を使用してツールの変更をクライアントに通知できます
+3. ツールは実行時に追加または削除できます
+4. ツール定義は更新できます（ただし注意して行う必要があります）
 
-## Error handling
+## エラー処理
 
-Tool errors should be reported within the result object, not as MCP protocol-level errors. This allows the LLM to see and potentially handle the error. When a tool encounters an error:
+ツールエラーはMCPプロトコルレベルのエラーではなく、結果オブジェクト内で報告する必要があります。これにより、LLMがエラーを認識し、適切に対処できるようになります。ツールがエラーに遭遇した場合:
 
-1. Set `isError` to `true` in the result
-2. Include error details in the `content` array
+1. 結果で`isError`を`true`に設定する
+2. `content`配列にエラーの詳細を含める
 
-Here's an example of proper error handling for tools:
+以下はツールの適切なエラー処理の例です:
 
 <Tabs>
   <Tab title="TypeScript">
     ```typescript
     try {
-      // Tool operation
+      // ツール操作
       const result = performOperation();
       return {
         content: [
           {
             type: "text",
-            text: `Operation successful: ${result}`
+            text: `操作が成功しました: ${result}`
           }
         ]
       };
@@ -266,7 +266,7 @@ Here's an example of proper error handling for tools:
         content: [
           {
             type: "text",
-            text: `Error: ${error.message}`
+            text: `エラー: ${error.message}`
           }
         ]
       };
@@ -276,13 +276,13 @@ Here's an example of proper error handling for tools:
   <Tab title="Python">
     ```python
     try:
-        # Tool operation
+        # ツール操作
         result = perform_operation()
         return types.CallToolResult(
             content=[
                 types.TextContent(
                     type="text",
-                    text=f"Operation successful: {result}"
+                    text=f"操作が成功しました: {result}"
                 )
             ]
         )
@@ -292,7 +292,7 @@ Here's an example of proper error handling for tools:
             content=[
                 types.TextContent(
                     type="text",
-                    text=f"Error: {str(error)}"
+                    text=f"エラー: {str(error)}"
                 )
             ]
         )
@@ -300,14 +300,14 @@ Here's an example of proper error handling for tools:
   </Tab>
 </Tabs>
 
-This approach allows the LLM to see that an error occurred and potentially take corrective action or request human intervention.
+このアプローチにより、LLMはエラーが発生したことを認識し、適切な対処や人間の介入を要求できます。
 
-## Testing tools
+## ツールのテスト
 
-A comprehensive testing strategy for MCP tools should cover:
+MCPツールの包括的なテスト戦略は以下をカバーする必要があります:
 
-- **Functional testing**: Verify tools execute correctly with valid inputs and handle invalid inputs appropriately
-- **Integration testing**: Test tool interaction with external systems using both real and mocked dependencies
-- **Security testing**: Validate authentication, authorization, input sanitization, and rate limiting
-- **Performance testing**: Check behavior under load, timeout handling, and resource cleanup
-- **Error handling**: Ensure tools properly report errors through the MCP protocol and clean up resources
+- **機能テスト**: ツールが有効な入力で正しく実行され、無効な入力を適切に処理することを確認
+- **統合テスト**: 実際の依存関係とモック化された依存関係の両方を使用して、外部システムとのツールの相互作用をテスト
+- **セキュリティテスト**: 認証、認可、入力サニタイズ、レート制限を検証
+- **パフォーマンステスト**: 負荷下での動作、タイムアウト処理、リソースクリーンアップを確認
+- **エラー処理**: ツールがMCPプロトコルを通じて適切にエラーを報告し、リソースをクリーンアップすることを確認

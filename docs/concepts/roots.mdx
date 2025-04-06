@@ -1,79 +1,79 @@
 ---
-title: "Roots"
-description: "Understanding roots in MCP"
+title: "ルート"
+description: "MCPにおけるルートの理解"
 ---
 
-Roots are a concept in MCP that define the boundaries where servers can operate. They provide a way for clients to inform servers about relevant resources and their locations.
+ルートは、サーバーが操作できる範囲を定義するMCPの概念です。クライアントがサーバーに関連するリソースとその場所を通知する方法を提供します。
 
-## What are Roots?
+## ルートとは？
 
-A root is a URI that a client suggests a server should focus on. When a client connects to a server, it declares which roots the server should work with. While primarily used for filesystem paths, roots can be any valid URI including HTTP URLs.
+ルートは、クライアントがサーバーに注目すべきURIを提案するものです。クライアントがサーバーに接続する際、サーバーが作業すべきルートを宣言します。主にファイルシステムパスで使用されますが、ルートはHTTP URLを含む任意の有効なURIにすることができます。
 
-For example, roots could be:
+例えば、ルートは以下のようになります:
 
 ```
 file:///home/user/projects/myapp
 https://api.example.com/v1
 ```
 
-## Why Use Roots?
+## ルートを使用する理由
 
-Roots serve several important purposes:
+ルートにはいくつかの重要な目的があります:
 
-1. **Guidance**: They inform servers about relevant resources and locations
-2. **Clarity**: Roots make it clear which resources are part of your workspace
-3. **Organization**: Multiple roots let you work with different resources simultaneously
+1. **ガイダンス**: 関連するリソースと場所をサーバーに通知します
+2. **明確化**: ワークスペースの一部であるリソースを明確にします
+3. **整理**: 複数のルートを使用することで、異なるリソースを同時に作業できます
 
-## How Roots Work
+## ルートの仕組み
 
-When a client supports roots, it:
+ルートをサポートするクライアントは以下のことを行います:
 
-1. Declares the `roots` capability during connection
-2. Provides a list of suggested roots to the server
-3. Notifies the server when roots change (if supported)
+1. 接続時に`roots`機能を宣言します
+2. サーバーに提案するルートのリストを提供します
+3. ルートが変更された場合（サポートされている場合）、サーバーに通知します
 
-While roots are informational and not strictly enforcing, servers should:
+ルートは情報提供であり厳密な強制力はありませんが、サーバーは以下のことを行うべきです:
 
-1. Respect the provided roots
-2. Use root URIs to locate and access resources
-3. Prioritize operations within root boundaries
+1. 提供されたルートを尊重します
+2. リソースを特定してアクセスするためにルートURIを使用します
+3. ルートの境界内での操作を優先します
 
-## Common Use Cases
+## 一般的な使用例
 
-Roots are commonly used to define:
+ルートは通常、以下の定義に使用されます:
 
-- Project directories
-- Repository locations
-- API endpoints
-- Configuration locations
-- Resource boundaries
+- プロジェクトディレクトリ
+- リポジトリの場所
+- APIエンドポイント
+- 設定場所
+- リソースの境界
 
-## Best Practices
+## ベストプラクティス
 
-When working with roots:
+ルートを扱う際には以下の点に注意してください:
 
-1. Only suggest necessary resources
-2. Use clear, descriptive names for roots
-3. Monitor root accessibility
-4. Handle root changes gracefully
+1. 必要なリソースのみを提案します
+2. ルートには明確で説明的な名前を使用します
+3. ルートのアクセシビリティを監視します
+4. ルートの変更を適切に処理します
 
-## Example
+## 例
 
-Here's how a typical MCP client might expose roots:
+典型的なMCPクライアントがルートを公開する方法の例:
 
 ```json
 {
   "roots": [
     {
       "uri": "file:///home/user/projects/frontend",
-      "name": "Frontend Repository"
+      "name": "フロントエンドリポジトリ"
     },
     {
       "uri": "https://api.example.com/v1",
-      "name": "API Endpoint"
+      "name": "APIエンドポイント"
     }
   ]
 }
 ```
 
-This configuration suggests the server focus on both a local repository and an API endpoint while keeping them logically separated.
+この設定では、サーバーにローカルリポジトリとAPIエンドポイントの両方に注目しつつ、論理的に分離することを提案しています。
