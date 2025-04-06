@@ -1,107 +1,106 @@
 ---
-title: Debugging
-description: A comprehensive guide to debugging Model Context Protocol (MCP) integrations
+title: "デバッグ"
+description: "Model Context Protocol (MCP)統合のデバッグに関する包括的なガイド"
 ---
 
-Effective debugging is essential when developing MCP servers or integrating them with applications. This guide covers the debugging tools and approaches available in the MCP ecosystem.
+効果的なデバッグは、MCPサーバーの開発やアプリケーションとの統合において不可欠です。このガイドでは、MCPエコシステムで利用可能なデバッグツールとアプローチを解説します。
 
 <Info>
-  This guide is for macOS. Guides for other platforms are coming soon.
+  このガイドはmacOS向けです。他のプラットフォーム向けのガイドは近日公開予定です。
 </Info>
 
-## Debugging tools overview
+## デバッグツール概要
 
-MCP provides several tools for debugging at different levels:
+MCPでは、さまざまなレベルでのデバッグに役立つツールを提供しています:
 
-1. **MCP Inspector**
-   - Interactive debugging interface
-   - Direct server testing
-   - See the [Inspector guide](/docs/tools/inspector) for details
+1. **MCPインスペクター**
+   - インタラクティブなデバッグインターフェース
+   - サーバーの直接テスト
+   - 詳細は[インスペクターガイド](/docs/tools/inspector)を参照
 
-2. **Claude Desktop Developer Tools**
-   - Integration testing
-   - Log collection
-   - Chrome DevTools integration
+2. **Claude Desktop開発者ツール**
+   - 統合テスト
+   - ログ収集
+   - Chrome DevTools統合
 
-3. **Server Logging**
-   - Custom logging implementations
-   - Error tracking
-   - Performance monitoring
+3. **サーバーロギング**
+   - カスタムロギング実装
+   - エラートラッキング
+   - パフォーマンスモニタリング
 
-## Debugging in Claude Desktop
+## Claude Desktopでのデバッグ
 
-### Checking server status
+### サーバーステータスの確認
 
-The Claude.app interface provides basic server status information:
+Claude.appインターフェースでは基本的なサーバーステータス情報を確認できます:
 
-1. Click the <img src="/images/claude-desktop-mcp-plug-icon.svg" style={{display: 'inline', margin: 0, height: '1.3em'}} /> icon to view:
-   - Connected servers
-   - Available prompts and resources
+1. <img src="/images/claude-desktop-mcp-plug-icon.svg" style={{display: 'inline', margin: 0, height: '1.3em'}} /> アイコンをクリックして以下を確認:
+   - 接続済みサーバー
+   - 利用可能なプロンプトとリソース
 
-2. Click the <img src="/images/claude-desktop-mcp-hammer-icon.svg" style={{display: 'inline', margin: 0, height: '1.3em'}} /> icon to view:
-   - Tools made available to the model
+2. <img src="/images/claude-desktop-mcp-hammer-icon.svg" style={{display: 'inline', margin: 0, height: '1.3em'}} /> アイコンをクリックして以下を確認:
+   - モデルに提供されるツール
 
-### Viewing logs
+### ログの表示
 
-Review detailed MCP logs from Claude Desktop:
+Claude Desktopから詳細なMCPログを確認:
 
 ```bash
-# Follow logs in real-time
+# リアルタイムでログを追跡
 tail -n 20 -F ~/Library/Logs/Claude/mcp*.log
 ```
 
-The logs capture:
-- Server connection events
-- Configuration issues
-- Runtime errors
-- Message exchanges
+ログには以下が記録されます:
+- サーバー接続イベント
+- 設定問題
+- ランタイムエラー
+- メッセージ交換
 
-### Using Chrome DevTools
+### Chrome DevToolsの使用
 
-Access Chrome's developer tools inside Claude Desktop to investigate client-side errors:
+Claude Desktop内でChromeの開発者ツールにアクセスし、クライアントサイドのエラーを調査:
 
-1. Create a `developer_settings.json` file with `allowDevTools` set to true:
+1. `allowDevTools`をtrueに設定した`developer_settings.json`ファイルを作成:
 
 ```bash
 echo '{"allowDevTools": true}' > ~/Library/Application\ Support/Claude/developer_settings.json
 ```
 
-2. Open DevTools: `Command-Option-Shift-i`
+2. DevToolsを開く: `Command-Option-Shift-i`
 
-Note: You'll see two DevTools windows:
-- Main content window
-- App title bar window
+注意: 2つのDevToolsウィンドウが表示されます:
+- メインコンテンツウィンドウ
+- アプリタイトルバーウィンドウ
 
-Use the Console panel to inspect client-side errors.
+Consoleパネルを使用してクライアントサイドエラーを調査します。
 
-Use the Network panel to inspect:
-- Message payloads
-- Connection timing
+Networkパネルを使用して以下を調査:
+- メッセージペイロード
+- 接続タイミング
 
-## Common issues
+## よくある問題
 
-### Working directory
+### 作業ディレクトリ
 
-When using MCP servers with Claude Desktop:
+Claude DesktopでMCPサーバーを使用する場合:
 
-- The working directory for servers launched via `claude_desktop_config.json` may be undefined (like `/` on macOS) since Claude Desktop could be started from anywhere
-- Always use absolute paths in your configuration and `.env` files to ensure reliable operation
-- For testing servers directly via command line, the working directory will be where you run the command
+- `claude_desktop_config.json`経由で起動されたサーバーの作業ディレクトリは未定義になる可能性があります（macOSでは`/`など）。Claude Desktopはどこからでも起動できるためです
+- 設定ファイルや`.env`ファイルでは常に絶対パスを使用し、確実に動作するようにします
+- コマンドラインで直接サーバーをテストする場合、作業ディレクトリはコマンドを実行した場所になります
 
-For example in `claude_desktop_config.json`, use:
+例えば`claude_desktop_config.json`では、相対パス`./data`ではなく以下のように使用します:
 ```json
 {
   "command": "npx",
   "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/username/data"]
 }
 ```
-Instead of relative paths like `./data`
 
-### Environment variables
+### 環境変数
 
-MCP servers inherit only a subset of environment variables automatically, like `USER`, `HOME`, and `PATH`.
+MCPサーバーは自動的に`USER`、`HOME`、`PATH`などの環境変数のサブセットのみを継承します。
 
-To override the default variables or provide your own, you can specify an `env` key in `claude_desktop_config.json`:
+デフォルト変数を上書きしたり独自の変数を提供するには、`claude_desktop_config.json`で`env`キーを指定します:
 
 ```json
 {
@@ -114,46 +113,46 @@ To override the default variables or provide your own, you can specify an `env` 
 }
 ```
 
-### Server initialization
+### サーバー初期化
 
-Common initialization problems:
+よくある初期化問題:
 
-1. **Path Issues**
-   - Incorrect server executable path
-   - Missing required files
-   - Permission problems
-   - Try using an absolute path for `command`
+1. **パス問題**
+   - サーバー実行ファイルのパスが不正
+   - 必要なファイルが不足
+   - パーミッション問題
+   - `command`に絶対パスを使用してみてください
 
-2. **Configuration Errors**
-   - Invalid JSON syntax
-   - Missing required fields
-   - Type mismatches
+2. **設定エラー**
+   - 無効なJSON構文
+   - 必須フィールドの不足
+   - 型の不一致
 
-3. **Environment Problems**
-   - Missing environment variables
-   - Incorrect variable values
-   - Permission restrictions
+3. **環境問題**
+   - 環境変数の不足
+   - 変数値が不正
+   - パーミッション制限
 
-### Connection problems
+### 接続問題
 
-When servers fail to connect:
+サーバーが接続に失敗する場合:
 
-1. Check Claude Desktop logs
-2. Verify server process is running
-3. Test standalone with [Inspector](/docs/tools/inspector)
-4. Verify protocol compatibility
+1. Claude Desktopログを確認
+2. サーバープロセスが実行中か確認
+3. [インスペクター](/docs/tools/inspector)でスタンドアロンテスト
+4. プロトコル互換性を確認
 
-## Implementing logging
+## ロギングの実装
 
-### Server-side logging
+### サーバーサイドロギング
 
-When building a server that uses the local stdio [transport](/docs/concepts/transports), all messages logged to stderr (standard error) will be captured by the host application (e.g., Claude Desktop) automatically.
+ローカルstdio[トランスポート](/docs/concepts/transports)を使用するサーバーを構築する場合、stderr（標準エラー）にログ出力されたすべてのメッセージはホストアプリケーション（例: Claude Desktop）によって自動的にキャプチャされます。
 
 <Warning>
-  Local MCP servers should not log messages to stdout (standard out), as this will interfere with protocol operation.
+  ローカルMCPサーバーはstdout（標準出力）にメッセージをログ出力しないでください。これはプロトコルの動作を妨げます。
 </Warning>
 
-For all [transports](/docs/concepts/transports), you can also provide logging to the client by sending a log message notification:
+すべての[トランスポート](/docs/concepts/transports)について、ログメッセージ通知を送信することでクライアントにログを提供することもできます:
 
 <Tabs>
   <Tab title="Python">
@@ -174,108 +173,108 @@ For all [transports](/docs/concepts/transports), you can also provide logging to
   </Tab>
 </Tabs>
 
-Important events to log:
-- Initialization steps
-- Resource access
-- Tool execution
-- Error conditions
-- Performance metrics
+ログに記録すべき重要なイベント:
+- 初期化ステップ
+- リソースアクセス
+- ツール実行
+- エラー状態
+- パフォーマンスメトリクス
 
-### Client-side logging
+### クライアントサイドロギング
 
-In client applications:
+クライアントアプリケーションでは:
 
-1. Enable debug logging
-2. Monitor network traffic
-3. Track message exchanges
-4. Record error states
+1. デバッグロギングを有効化
+2. ネットワークトラフィックを監視
+3. メッセージ交換を追跡
+4. エラー状態を記録
 
-## Debugging workflow
+## デバッグワークフロー
 
-### Development cycle
+### 開発サイクル
 
-1. Initial Development
-   - Use [Inspector](/docs/tools/inspector) for basic testing
-   - Implement core functionality
-   - Add logging points
+1. 初期開発
+   - 基本テストに[インスペクター](/docs/tools/inspector)を使用
+   - コア機能を実装
+   - ロギングポイントを追加
 
-2. Integration Testing
-   - Test in Claude Desktop
-   - Monitor logs
-   - Check error handling
+2. 統合テスト
+   - Claude Desktopでテスト
+   - ログを監視
+   - エラーハンドリングを確認
 
-### Testing changes
+### 変更のテスト
 
-To test changes efficiently:
+効率的に変更をテストするには:
 
-- **Configuration changes**: Restart Claude Desktop
-- **Server code changes**: Use Command-R to reload
-- **Quick iteration**: Use [Inspector](/docs/tools/inspector) during development
+- **設定変更**: Claude Desktopを再起動
+- **サーバーコード変更**: Command-Rでリロード
+- **迅速な反復**: 開発中に[インスペクター](/docs/tools/inspector)を使用
 
-## Best practices
+## ベストプラクティス
 
-### Logging strategy
+### ロギング戦略
 
-1. **Structured Logging**
-   - Use consistent formats
-   - Include context
-   - Add timestamps
-   - Track request IDs
+1. **構造化ロギング**
+   - 一貫したフォーマットを使用
+   - コンテキストを含める
+   - タイムスタンプを追加
+   - リクエストIDを追跡
 
-2. **Error Handling**
-   - Log stack traces
-   - Include error context
-   - Track error patterns
-   - Monitor recovery
+2. **エラーハンドリング**
+   - スタックトレースをログに記録
+   - エラーコンテキストを含める
+   - エラーパターンを追跡
+   - 回復を監視
 
-3. **Performance Tracking**
-   - Log operation timing
-   - Monitor resource usage
-   - Track message sizes
-   - Measure latency
+3. **パフォーマンストラッキング**
+   - 操作時間をログに記録
+   - リソース使用状況を監視
+   - メッセージサイズを追跡
+   - レイテンシを測定
 
-### Security considerations
+### セキュリティ考慮事項
 
-When debugging:
+デバッグ時には以下に注意:
 
-1. **Sensitive Data**
-   - Sanitize logs
-   - Protect credentials
-   - Mask personal information
+1. **機密データ**
+   - ログをサニタイズ
+   - 認証情報を保護
+   - 個人情報をマスク
 
-2. **Access Control**
-   - Verify permissions
-   - Check authentication
-   - Monitor access patterns
+2. **アクセス制御**
+   - パーミッションを確認
+   - 認証をチェック
+   - アクセスパターンを監視
 
-## Getting help
+## ヘルプの入手
 
-When encountering issues:
+問題が発生した場合:
 
-1. **First Steps**
-   - Check server logs
-   - Test with [Inspector](/docs/tools/inspector)
-   - Review configuration
-   - Verify environment
+1. **最初のステップ**
+   - サーバーログを確認
+   - [インスペクター](/docs/tools/inspector)でテスト
+   - 設定を確認
+   - 環境を検証
 
-2. **Support Channels**
+2. **サポートチャネル**
    - GitHub issues
    - GitHub discussions
 
-3. **Providing Information**
-   - Log excerpts
-   - Configuration files
-   - Steps to reproduce
-   - Environment details
+3. **情報の提供**
+   - ログ抜粋
+   - 設定ファイル
+   - 再現手順
+   - 環境詳細
 
-## Next steps
+## 次のステップ
 
 <CardGroup cols={2}>
   <Card
-    title="MCP Inspector"
+    title="MCPインスペクター"
     icon="magnifying-glass"
     href="/docs/tools/inspector"
   >
-    Learn to use the MCP Inspector
+    MCPインスペクターの使用方法を学ぶ
   </Card>
 </CardGroup>

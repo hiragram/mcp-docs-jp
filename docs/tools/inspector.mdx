@@ -1,16 +1,15 @@
 ---
-title: Inspector
-description: In-depth guide to using the MCP Inspector for testing and debugging Model Context Protocol servers
+title: "インスペクター"
+description: "Model Context ProtocolサーバーのテストとデバッグのためのMCPインスペクターの詳細ガイド"
 ---
 
-The [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is an interactive developer tool for testing and debugging MCP servers. While the [Debugging Guide](/docs/tools/debugging) covers the Inspector as part of the overall debugging toolkit, this document provides a detailed exploration of the Inspector's features and capabilities.
+[MCPインスペクター](https://github.com/modelcontextprotocol/inspector)は、MCPサーバーのテストとデバッグのためのインタラクティブな開発者ツールです。[デバッグガイド](/docs/tools/debugging)ではインスペクターを総合的なデバッグツールキットの一部として紹介していますが、このドキュメントではインスペクターの機能と能力について詳細に解説します。
 
-## Getting started
+## はじめに
 
-### Installation and basic usage
+### インストールと基本的な使用方法
 
-The Inspector runs directly through `npx` without requiring installation:
-
+インスペクターはインストール不要で`npx`経由で直接実行できます:
 
 ```bash
 npx @modelcontextprotocol/inspector <command>
@@ -20,33 +19,32 @@ npx @modelcontextprotocol/inspector <command>
 npx @modelcontextprotocol/inspector <command> <arg1> <arg2>
 ```
 
-#### Inspecting servers from NPM or PyPi
+#### NPMまたはPyPiからのサーバー検査
 
-A common way to start server packages from [NPM](https://npmjs.com) or [PyPi](https://pypi.com).
+[NPM](https://npmjs.com)や[PyPi](https://pypi.com)からサーバーパッケージを起動する一般的な方法です。
 
 <Tabs>
 
-  <Tab title="NPM package">
+  <Tab title="NPMパッケージ">
   ```bash
   npx -y @modelcontextprotocol/inspector npx <package-name> <args>
-  # For example
+  # 例
   npx -y @modelcontextprotocol/inspector npx server-postgres postgres://127.0.0.1/testdb
   ```
   </Tab>
 
-  <Tab title="PyPi package">
+  <Tab title="PyPiパッケージ">
   ```bash
   npx @modelcontextprotocol/inspector uvx <package-name> <args>
-  # For example
+  # 例
   npx @modelcontextprotocol/inspector uvx mcp-server-git --repository ~/code/mcp/servers.git
   ```
   </Tab>
 </Tabs>
 
-#### Inspecting locally developed servers
+#### ローカルで開発したサーバーの検査
 
-To inspect servers locally developed or downloaded as a repository, the most common
-way is:
+ローカルで開発またはリポジトリとしてダウンロードしたサーバーを検査する最も一般的な方法は:
 
 <Tabs>
   <Tab title="TypeScript">
@@ -66,80 +64,80 @@ way is:
   </Tab>
 </Tabs>
 
-Please carefully read any attached README for the most accurate instructions.
+正確な手順については添付のREADMEをよくお読みください。
 
-## Feature overview
+## 機能概要
 
-<Frame caption="The MCP Inspector interface">
+<Frame caption="MCPインスペクターインターフェース">
   <img src="/images/mcp-inspector.png" />
 </Frame>
 
-The Inspector provides several features for interacting with your MCP server:
+インスペクターはMCPサーバーと対話するためのいくつかの機能を提供します:
 
-### Server connection pane
-- Allows selecting the [transport](/docs/concepts/transports) for connecting to the server
-- For local servers, supports customizing the command-line arguments and environment
+### サーバー接続ペイン
+- サーバーへの接続に使用する[トランスポート](/docs/concepts/transports)を選択可能
+- ローカルサーバーでは、コマンドライン引数と環境のカスタマイズをサポート
 
-### Resources tab
-- Lists all available resources
-- Shows resource metadata (MIME types, descriptions)
-- Allows resource content inspection
-- Supports subscription testing
+### リソースタブ
+- 利用可能なすべてのリソースをリスト表示
+- リソースメタデータ（MIMEタイプ、説明）を表示
+- リソースコンテンツの検査を可能に
+- サブスクリプションテストをサポート
 
-### Prompts tab
-- Displays available prompt templates
-- Shows prompt arguments and descriptions
-- Enables prompt testing with custom arguments
-- Previews generated messages
+### プロンプトタブ
+- 利用可能なプロンプトテンプレートを表示
+- プロンプト引数と説明を表示
+- カスタム引数でのプロンプトテストを可能に
+- 生成されたメッセージをプレビュー
 
-### Tools tab
-- Lists available tools
-- Shows tool schemas and descriptions
-- Enables tool testing with custom inputs
-- Displays tool execution results
+### ツールタブ
+- 利用可能なツールをリスト表示
+- ツールスキーマと説明を表示
+- カスタム入力でのツールテストを可能に
+- ツール実行結果を表示
 
-### Notifications pane
-- Presents all logs recorded from the server
-- Shows notifications received from the server
+### 通知ペイン
+- サーバーから記録されたすべてのログを表示
+- サーバーから受信した通知を表示
 
-## Best practices
+## ベストプラクティス
 
-### Development workflow
+### 開発ワークフロー
 
-1. Start Development
-   - Launch Inspector with your server
-   - Verify basic connectivity
-   - Check capability negotiation
+1. 開発開始
+   - サーバーと共にインスペクターを起動
+   - 基本的な接続性を確認
+   - 機能ネゴシエーションをチェック
 
-2. Iterative testing
-   - Make server changes
-   - Rebuild the server
-   - Reconnect the Inspector
-   - Test affected features
-   - Monitor messages
+2. 反復テスト
+   - サーバーに変更を加える
+   - サーバーをリビルド
+   - インスペクターを再接続
+   - 影響を受ける機能をテスト
+   - メッセージを監視
 
-3. Test edge cases
-   - Invalid inputs
-   - Missing prompt arguments
-   - Concurrent operations
-   - Verify error handling and error responses
+3. エッジケースのテスト
+   - 無効な入力
+   - 不足しているプロンプト引数
+   - 並行操作
+   - エラーハンドリングとエラーレスポンスを検証
 
-## Next steps
+## 次のステップ
 
 <CardGroup cols={2}>
     <Card
-        title="Inspector Repository"
+        title="インスペクターリポジトリ"
         icon="github"
         href="https://github.com/modelcontextprotocol/inspector"
     >
-        Check out the MCP Inspector source code
+        MCPインスペクターのソースコードを確認
     </Card>
 
     <Card
-        title="Debugging Guide"
+        title="デバッグガイド"
         icon="bug"
         href="/docs/tools/debugging"
     >
-        Learn about broader debugging strategies
+        より広範なデバッグ戦略を学ぶ
     </Card>
 </CardGroup>

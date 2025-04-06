@@ -1,17 +1,17 @@
 ---
-title: "Transports"
-description: "Learn about MCP's communication mechanisms"
+title: "トランスポート"
+description: "MCPの通信メカニズムについて学ぶ"
 ---
 
-Transports in the Model Context Protocol (MCP) provide the foundation for communication between clients and servers. A transport handles the underlying mechanics of how messages are sent and received.
+Model Context Protocol (MCP)におけるトランスポートは、クライアントとサーバー間の通信の基盤を提供します。トランスポートは、メッセージの送受信の基本的な仕組みを処理します。
 
-## Message Format
+## メッセージフォーマット
 
-MCP uses [JSON-RPC](https://www.jsonrpc.org/) 2.0 as its wire format. The transport layer is responsible for converting MCP protocol messages into JSON-RPC format for transmission and converting received JSON-RPC messages back into MCP protocol messages.
+MCPは通信フォーマットとして[JSON-RPC](https://www.jsonrpc.org/) 2.0を使用しています。トランスポート層は、MCPプロトコルメッセージをJSON-RPCフォーマットに変換して送信し、受信したJSON-RPCメッセージをMCPプロトコルメッセージに戻す役割を担います。
 
-There are three types of JSON-RPC messages used:
+使用されるJSON-RPCメッセージには3つのタイプがあります:
 
-### Requests
+### リクエスト
 ```typescript
 {
   jsonrpc: "2.0",
@@ -21,7 +21,7 @@ There are three types of JSON-RPC messages used:
 }
 ```
 
-### Responses
+### レスポンス
 ```typescript
 {
   jsonrpc: "2.0",
@@ -35,7 +35,7 @@ There are three types of JSON-RPC messages used:
 }
 ```
 
-### Notifications
+### 通知
 ```typescript
 {
   jsonrpc: "2.0",
@@ -44,19 +44,19 @@ There are three types of JSON-RPC messages used:
 }
 ```
 
-## Built-in Transport Types
+## 組み込みトランスポートタイプ
 
-MCP includes two standard transport implementations:
+MCPには2つの標準トランスポート実装が含まれています:
 
-### Standard Input/Output (stdio)
+### 標準入出力(stdio)
 
-The stdio transport enables communication through standard input and output streams. This is particularly useful for local integrations and command-line tools.
+stdioトランスポートは、標準入力と出力ストリームを通じた通信を可能にします。これは特にローカル統合やコマンドラインツールに有用です。
 
-Use stdio when:
-- Building command-line tools
-- Implementing local integrations
-- Needing simple process communication
-- Working with shell scripts
+以下の場合にstdioを使用します:
+- コマンドラインツールを構築する場合
+- ローカル統合を実装する場合
+- シンプルなプロセス間通信が必要な場合
+- シェルスクリプトを扱う場合
 
 <Tabs>
   <Tab title="TypeScript (Server)">
@@ -79,6 +79,7 @@ Use stdio when:
       version: "1.0.0"
     }, {
       capabilities: {}
+
     });
 
     const transport = new StdioClientTransport({
@@ -116,12 +117,12 @@ Use stdio when:
 
 ### Server-Sent Events (SSE)
 
-SSE transport enables server-to-client streaming with HTTP POST requests for client-to-server communication.
+SSEトランスポートは、サーバーからクライアントへのストリーミングを可能にし、クライアントからサーバーへの通信にはHTTP POSTリクエストを使用します。
 
-Use SSE when:
-- Only server-to-client streaming is needed
-- Working with restricted networks
-- Implementing simple updates
+以下の場合にSSEを使用します:
+- サーバーからクライアントへのストリーミングのみが必要な場合
+- 制限されたネットワーク環境で作業する場合
+- シンプルな更新を実装する場合
 
 <Tabs>
   <Tab title="TypeScript (Server)">
@@ -201,30 +202,30 @@ Use SSE when:
   </Tab>
 </Tabs>
 
-## Custom Transports
+## カスタムトランスポート
 
-MCP makes it easy to implement custom transports for specific needs. Any transport implementation just needs to conform to the Transport interface:
+MCPでは、特定のニーズに合わせてカスタムトランスポートを簡単に実装できます。トランスポート実装はTransportインターフェースに準拠する必要があります:
 
-You can implement custom transports for:
-- Custom network protocols
-- Specialized communication channels
-- Integration with existing systems
-- Performance optimization
+以下の場合にカスタムトランスポートを実装します:
+- カスタムネットワークプロトコル
+- 特殊な通信チャネル
+- 既存システムとの統合
+- パフォーマンス最適化
 
 <Tabs>
   <Tab title="TypeScript">
     ```typescript
     interface Transport {
-      // Start processing messages
+      // メッセージ処理を開始
       start(): Promise<void>;
 
-      // Send a JSON-RPC message
+      // JSON-RPCメッセージを送信
       send(message: JSONRPCMessage): Promise<void>;
 
-      // Close the connection
+      // 接続を閉じる
       close(): Promise<void>;
 
-      // Callbacks
+      // コールバック
       onclose?: () => void;
       onerror?: (error: Error) => void;
       onmessage?: (message: JSONRPCMessage) => void;
@@ -232,8 +233,7 @@ You can implement custom transports for:
     ```
   </Tab>
   <Tab title="Python">
-    Note that while MCP Servers are often implemented with asyncio, we recommend
-    implementing low-level interfaces like transports with `anyio` for wider compatibility.
+    MCPサーバーはasyncioで実装されることが多いですが、トランスポートのような低レベルインターフェースは互換性を広げるためanyioで実装することを推奨します。
     ```python
     @contextmanager
     async def create_transport(
@@ -241,26 +241,26 @@ You can implement custom transports for:
         write_stream: MemoryObjectSendStream[JSONRPCMessage]
     ):
         """
-        Transport interface for MCP.
+        MCPのトランスポートインターフェース
 
         Args:
-            read_stream: Stream to read incoming messages from
-            write_stream: Stream to write outgoing messages to
+            read_stream: 受信メッセージを読み取るストリーム
+            write_stream: 送信メッセージを書き込むストリーム
         """
         async with anyio.create_task_group() as tg:
             try:
-                # Start processing messages
+                # メッセージ処理を開始
                 tg.start_soon(lambda: process_messages(read_stream))
 
-                # Send messages
+                # メッセージを送信
                 async with write_stream:
                     yield write_stream
 
             except Exception as exc:
-                # Handle errors
+                # エラー処理
                 raise exc
             finally:
-                # Clean up
+                # クリーンアップ
                 tg.cancel_scope.cancel()
                 await write_stream.aclose()
                 await read_stream.aclose()
@@ -268,17 +268,17 @@ You can implement custom transports for:
   </Tab>
 </Tabs>
 
-## Error Handling
+## エラーハンドリング
 
-Transport implementations should handle various error scenarios:
+トランスポート実装では以下のエラーシナリオを処理する必要があります:
 
-1. Connection errors
-2. Message parsing errors
-3. Protocol errors
-4. Network timeouts
-5. Resource cleanup
+1. 接続エラー
+2. メッセージ解析エラー
+3. プロトコルエラー
+4. ネットワークタイムアウト
+5. リソースクリーンアップ
 
-Example error handling:
+エラーハンドリングの例:
 
 <Tabs>
   <Tab title="TypeScript">
@@ -286,18 +286,18 @@ Example error handling:
     class ExampleTransport implements Transport {
       async start() {
         try {
-          // Connection logic
+          // 接続ロジック
         } catch (error) {
-          this.onerror?.(new Error(`Failed to connect: ${error}`));
+          this.onerror?.(new Error(`接続失敗: ${error}`));
           throw error;
         }
       }
 
       async send(message: JSONRPCMessage) {
         try {
-          // Sending logic
+          // 送信ロジック
         } catch (error) {
-          this.onerror?.(new Error(`Failed to send message: ${error}`));
+          this.onerror?.(new Error(`メッセージ送信失敗: ${error}`));
           throw error;
         }
       }
@@ -305,94 +305,93 @@ Example error handling:
     ```
   </Tab>
   <Tab title="Python">
-  Note that while MCP Servers are often implemented with asyncio, we recommend
-  implementing low-level interfaces like transports with `anyio` for wider compatibility.
+    MCPサーバーはasyncioで実装されることが多いですが、トランスポートのような低レベルインターフェースは互換性を広げるためanyioで実装することを推奨します。
     ```python
     @contextmanager
     async def example_transport(scope: Scope, receive: Receive, send: Send):
         try:
-            # Create streams for bidirectional communication
+            # 双方向通信のためのストリームを作成
             read_stream_writer, read_stream = anyio.create_memory_object_stream(0)
             write_stream, write_stream_reader = anyio.create_memory_object_stream(0)
 
             async def message_handler():
                 try:
                     async with read_stream_writer:
-                        # Message handling logic
+                        # メッセージ処理ロジック
                         pass
                 except Exception as exc:
-                    logger.error(f"Failed to handle message: {exc}")
+                    logger.error(f"メッセージ処理失敗: {exc}")
                     raise exc
 
             async with anyio.create_task_group() as tg:
                 tg.start_soon(message_handler)
                 try:
-                    # Yield streams for communication
+                    # 通信のためのストリームを提供
                     yield read_stream, write_stream
                 except Exception as exc:
-                    logger.error(f"Transport error: {exc}")
+                    logger.error(f"トランスポートエラー: {exc}")
                     raise exc
                 finally:
                     tg.cancel_scope.cancel()
                     await write_stream.aclose()
                     await read_stream.aclose()
         except Exception as exc:
-            logger.error(f"Failed to initialize transport: {exc}")
+            logger.error(f"トランスポート初期化失敗: {exc}")
             raise exc
     ```
   </Tab>
 </Tabs>
 
-## Best Practices
+## ベストプラクティス
 
-When implementing or using MCP transport:
+MCPトランスポートを実装または使用する際のベストプラクティス:
 
-1. Handle connection lifecycle properly
-2. Implement proper error handling
-3. Clean up resources on connection close
-4. Use appropriate timeouts
-5. Validate messages before sending
-6. Log transport events for debugging
-7. Implement reconnection logic when appropriate
-8. Handle backpressure in message queues
-9. Monitor connection health
-10. Implement proper security measures
+1. 接続ライフサイクルを適切に処理する
+2. 適切なエラーハンドリングを実装する
+3. 接続終了時にリソースをクリーンアップする
+4. 適切なタイムアウトを使用する
+5. 送信前にメッセージを検証する
+6. デバッグのためにトランスポートイベントをログに記録する
+7. 必要に応じて再接続ロジックを実装する
+8. メッセージキューでバックプレッシャーを処理する
+9. 接続の健全性を監視する
+10. 適切なセキュリティ対策を実装する
 
-## Security Considerations
+## セキュリティ考慮事項
 
-When implementing transport:
+トランスポートを実装する際のセキュリティ考慮事項:
 
-### Authentication and Authorization
-- Implement proper authentication mechanisms
-- Validate client credentials
-- Use secure token handling
-- Implement authorization checks
+### 認証と認可
+- 適切な認証メカニズムを実装する
+- クライアント認証情報を検証する
+- 安全なトークンハンドリングを使用する
+- 認可チェックを実装する
 
-### Data Security
-- Use TLS for network transport
-- Encrypt sensitive data
-- Validate message integrity
-- Implement message size limits
-- Sanitize input data
+### データセキュリティ
+- ネットワークトランスポートにTLSを使用する
+- 機密データを暗号化する
+- メッセージの完全性を検証する
+- メッセージサイズ制限を実装する
+- 入力データをサニタイズする
 
-### Network Security
-- Implement rate limiting
-- Use appropriate timeouts
-- Handle denial of service scenarios
-- Monitor for unusual patterns
-- Implement proper firewall rules
+### ネットワークセキュリティ
+- レート制限を実装する
+- 適切なタイムアウトを使用する
+- サービス拒否シナリオを処理する
+- 異常なパターンを監視する
+- 適切なファイアウォールルールを実装する
 
-## Debugging Transport
+## トランスポートのデバッグ
 
-Tips for debugging transport issues:
+トランスポート問題のデバッグのヒント:
 
-1. Enable debug logging
-2. Monitor message flow
-3. Check connection states
-4. Validate message formats
-5. Test error scenarios
-6. Use network analysis tools
-7. Implement health checks
-8. Monitor resource usage
-9. Test edge cases
-10. Use proper error tracking
+1. デバッグログを有効にする
+2. メッセージフローを監視する
+3. 接続状態を確認する
+4. メッセージフォーマットを検証する
+5. エラーシナリオをテストする
+6. ネットワーク分析ツールを使用する
+7. ヘルスチェックを実装する
+8. リソース使用状況を監視する
+9. エッジケースをテストする
+10. 適切なエラートラッキングを使用する
