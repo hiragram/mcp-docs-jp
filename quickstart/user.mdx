@@ -1,51 +1,51 @@
 ---
-title: "For Claude Desktop Users"
-description: "Get started using pre-built servers in Claude for Desktop."
+title: "Claude Desktopユーザー向け"
+description: "Claude for Desktopで事前構築済みサーバーを使い始める方法"
 ---
 
-In this tutorial, you will extend [Claude for Desktop](https://claude.ai/download) so that it can read from your computer's file system, write new files, move files, and even search files.
+このチュートリアルでは、[Claude for Desktop](https://claude.ai/download)を拡張して、コンピュータのファイルシステムを読み取り、新しいファイルを作成し、ファイルを移動し、さらにはファイルを検索できるようにします。
 
 <Frame>
   <img src="/images/quickstart-filesystem.png" />
 </Frame>
 
-Don't worry — it will ask you for your permission before executing these actions!
+心配ありません。これらのアクションを実行する前に、必ず許可を求めます！
 
-## 1. Download Claude for Desktop
+## 1. Claude for Desktopをダウンロード
 
-Start by downloading [Claude for Desktop](https://claude.ai/download), choosing either macOS or Windows. (Linux is not yet supported for Claude for Desktop.)
+まず、[Claude for Desktop](https://claude.ai/download)をダウンロードし、macOSまたはWindowsを選択してください。（現時点ではLinuxはサポートされていません。）
 
-Follow the installation instructions.
+インストール手順に従ってください。
 
-If you already have Claude for Desktop, make sure it's on the latest version by clicking on the Claude menu on your computer and selecting "Check for Updates..."
+すでにClaude for Desktopをお持ちの場合は、コンピュータ上のClaudeメニューをクリックし、「アップデートを確認...」を選択して、最新バージョンであることを確認してください。
 
-<Accordion title="Why Claude for Desktop and not Claude.ai?">
-  Because servers are locally run, MCP currently only supports desktop hosts. Remote hosts are in active development.
+<Accordion title="Claude.aiではなくClaude for Desktopを使う理由">
+  サーバーはローカルで実行されるため、MCPは現在デスクトップホストのみをサポートしています。リモートホストのサポートは開発中です。
 </Accordion>
 
-## 2. Add the Filesystem MCP Server
+## 2. Filesystem MCPサーバーを追加
 
-To add this filesystem functionality, we will be installing a pre-built [Filesystem MCP Server](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem) to Claude for Desktop. This is one of dozens of [servers](https://github.com/modelcontextprotocol/servers/tree/main) created by Anthropic and the community.
+このファイルシステム機能を追加するには、事前構築済みの[Filesystem MCP Server](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem)をClaude for Desktopにインストールします。これはAnthropicとコミュニティによって作成された数十の[サーバー](https://github.com/modelcontextprotocol/servers/tree/main)の1つです。
 
-Get started by opening up the Claude menu on your computer and select "Settings..." Please note that these are not the Claude Account Settings found in the app window itself.
+コンピュータ上のClaudeメニューを開き、「Settings...」を選択してください。これはアプリウィンドウ内にあるClaudeアカウント設定ではないことに注意してください。
 
-This is what it should look like on a Mac:
+Macでの表示は次のようになります:
 <Frame style={{ textAlign: 'center' }}>
   <img src="/images/quickstart-menu.png" width="400" />
 </Frame>
 
-Click on "Developer" in the left-hand bar of the Settings pane, and then click on "Edit Config":
+設定パネルの左側のバーで「Developer」をクリックし、「Edit Config」をクリックします:
 <Frame>
   <img src="/images/quickstart-developer.png" />
 </Frame>
 
-This will create a configuration file at:
+これにより、設定ファイルが次の場所に作成されます（まだ存在しない場合）:
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 
-if you don't already have one, and will display the file in your file system.
+また、ファイルシステム内でこのファイルが表示されます。
 
-Open up the configuration file in any text editor. Replace the file contents with this:
+テキストエディタで設定ファイルを開き、内容を以下のように置き換えます:
 <Tabs>
 <Tab title="MacOS/Linux">
 ```json
@@ -107,47 +107,47 @@ This configuration file tells Claude for Desktop which MCP servers to start up e
 Claude for Desktop will run the commands in the configuration file with the permissions of your user account, and access to your local files. Only add commands if you understand and trust the source.
 </Warning>
 
-## 3. Restart Claude
+## 3. Claudeを再起動
 
-After updating your configuration file, you need to restart Claude for Desktop.
+設定ファイルを更新した後、Claude for Desktopを再起動する必要があります。
 
-Upon restarting, you should see a hammer <img src="/images/claude-desktop-mcp-hammer-icon.svg" style={{display: 'inline', margin: 0, height: '1.3em'}} /> icon in the bottom right corner of the input box:
+再起動すると、入力ボックスの右下にハンマー <img src="/images/claude-desktop-mcp-hammer-icon.svg" style={{display: 'inline', margin: 0, height: '1.3em'}} /> アイコンが表示されます:
 
 <Frame>
   <img src="/images/quickstart-hammer.png" />
 </Frame>
 
-After clicking on the hammer icon, you should see the tools that come with the Filesystem MCP Server:
+ハンマーアイコンをクリックすると、Filesystem MCPサーバーに付属するツールが表示されます:
 
 <Frame style={{ textAlign: 'center' }}>
   <img src="/images/quickstart-tools.png" width="400" />
 </Frame>
 
-If your server isn't being picked up by Claude for Desktop, proceed to the [Troubleshooting](#troubleshooting) section for debugging tips.
+サーバーがClaude for Desktopに認識されない場合は、[トラブルシューティング](#troubleshooting)セクションに進み、デバッグのヒントを参照してください。
 
-## 4. Try it out!
+## 4. 試してみましょう！
 
-You can now talk to Claude and ask it about your filesystem. It should know when to call the relevant tools.
+Claudeと会話し、ファイルシステムについて尋ねることができます。Claudeは適切なタイミングで関連するツールを呼び出すことができます。
 
-Things you might try asking Claude:
-- Can you write a poem and save it to my desktop?
-- What are some work-related files in my downloads folder?
-- Can you take all the images on my desktop and move them to a new folder called "Images"?
+試してみる質問例:
+- 詩を書いてデスクトップに保存できますか？
+- ダウンロードフォルダにある仕事関連のファイルは何ですか？
+- デスクトップ上のすべての画像を「Images」という新しいフォルダに移動できますか？
 
-As needed, Claude will call the relevant tools and seek your approval before taking an action:
+必要に応じて、Claudeは関連するツールを呼び出し、アクションを実行する前に承認を求めます:
 <Frame style={{ textAlign: 'center' }}>
   <img src="/images/quickstart-approve.png" width="500" />
 </Frame>
 
-## Troubleshooting
+## トラブルシューティング
 
 <AccordionGroup>
-<Accordion title="Server not showing up in Claude / hammer icon missing">
-  1. Restart Claude for Desktop completely
-  2. Check your `claude_desktop_config.json` file syntax
-  3. Make sure the file paths included in `claude_desktop_config.json` are valid and that they are absolute and not relative
-  4. Look at [logs](#getting-logs-from-claude-for-desktop) to see why the server is not connecting
-  5. In your command line, try manually running the server (replacing `username` as you did in `claude_desktop_config.json`) to see if you get any errors:
+<Accordion title="Claudeにサーバーが表示されない/ハンマーアイコンがない">
+  1. Claude for Desktopを完全に再起動してください
+  2. `claude_desktop_config.json`ファイルの構文を確認してください
+  3. `claude_desktop_config.json`に含まれるファイルパスが有効で、相対パスではなく絶対パスであることを確認してください
+  4. [ログ](#getting-logs-from-claude-for-desktop)を確認して、サーバーが接続できない理由を調べてください
+  5. コマンドラインで、サーバーを手動で実行してみてください（`claude_desktop_config.json`で行ったように`username`を置き換えて）、エラーが発生するかどうかを確認します:
 <Tabs>
 <Tab title="MacOS/Linux">
 ```bash
@@ -161,15 +161,15 @@ npx -y @modelcontextprotocol/server-filesystem C:\Users\username\Desktop C:\User
 </Tab>
 </Tabs>
 </Accordion>
-<Accordion title="Getting logs from Claude for Desktop">
-  Claude.app logging related to MCP is written to log files in:
+<Accordion title="Claude for Desktopからログを取得する">
+  MCP関連のClaude.appのログは、次の場所のログファイルに書き込まれます:
   - macOS: `~/Library/Logs/Claude`
   - Windows: `%APPDATA%\Claude\logs`
 
-  - `mcp.log` will contain general logging about MCP connections and connection failures.
-  - Files named `mcp-server-SERVERNAME.log` will contain error (stderr) logging from the named server.
+  - `mcp.log`には、MCP接続と接続失敗に関する一般的なログが含まれます。
+  - `mcp-server-SERVERNAME.log`という名前のファイルには、指定されたサーバーからのエラー（stderr）ログが含まれます。
 
-  You can run the following command to list recent logs and follow along with any new ones (on Windows, it will only show recent logs):
+  最近のログを一覧表示し、新しいログを追跡するには、次のコマンドを実行します（Windowsでは最近のログのみ表示されます）:
 <Tabs>
 <Tab title="MacOS/Linux">
 ```bash
@@ -184,18 +184,18 @@ type "%APPDATA%\Claude\logs\mcp*.log"
 </Tab>
 </Tabs>
 </Accordion>
-<Accordion title="Tool calls failing silently">
-  If Claude attempts to use the tools but they fail:
+<Accordion title="ツール呼び出しが失敗しても通知されない">
+  Claudeがツールを使用しようとして失敗した場合:
 
-  1. Check Claude's logs for errors
-  2. Verify your server builds and runs without errors
-  3. Try restarting Claude for Desktop
+  1. Claudeのログでエラーを確認してください
+  2. サーバーがエラーなくビルドおよび実行されることを確認してください
+  3. Claude for Desktopを再起動してみてください
 </Accordion>
-<Accordion title="None of this is working. What do I do?">
-  Please refer to our [debugging guide](/docs/tools/debugging) for better debugging tools and more detailed guidance.
+<Accordion title="何も動作しません。どうすればよいですか？">
+  より良いデバッグツールと詳細なガイダンスについては、[デバッグガイド](/docs/tools/debugging)を参照してください。
 </Accordion>
-<Accordion title="ENOENT error and `${APPDATA}` in paths on Windows">
-If your configured server fails to load, and you see within its logs an error referring to `${APPDATA}` within a path, you may need to add the expanded value of `%APPDATA%` to your `env` key in `claude_desktop_config.json`:
+<Accordion title="WindowsでENOENTエラーと`${APPDATA}`がパスに含まれる場合">
+設定したサーバーの読み込みに失敗し、ログ内でパス内の`${APPDATA}`を参照するエラーが表示される場合は、`claude_desktop_config.json`の`env`キーに`%APPDATA%`の展開値を追加する必要があるかもしれません:
 
 ```json
 {
@@ -210,12 +210,12 @@ If your configured server fails to load, and you see within its logs an error re
 }
 ```
 
-With this change in place, launch Claude Desktop once again.
+この変更を行った後、Claude Desktopをもう一度起動してください。
 
 <Warning>
-**NPM should be installed globally**
+**NPMはグローバルにインストールする必要があります**
 
-The `npx` command may continue to fail if you have not installed NPM globally. If NPM is already installed globally, you will find `%APPDATA%\npm` exists on your system. If not, you can install NPM globally by running the following command:
+NPMをグローバルにインストールしていない場合、`npx`コマンドは引き続き失敗する可能性があります。NPMがすでにグローバルにインストールされている場合、システム上に`%APPDATA%\npm`が存在します。存在しない場合は、次のコマンドを実行してNPMをグローバルにインストールできます:
 
 ```bash
 npm install -g npm
@@ -225,20 +225,20 @@ npm install -g npm
 </Accordion>
 </AccordionGroup>
 
-## Next steps
+## 次のステップ
 <CardGroup cols={2}>
   <Card
-    title="Explore other servers"
+    title="他のサーバーを探索する"
     icon="grid"
     href="/examples"
   >
-    Check out our gallery of official MCP servers and implementations
+    公式MCPサーバーと実装のギャラリーをチェック
   </Card>
   <Card
-    title="Build your own server"
+    title="独自のサーバーを構築する"
     icon="code"
     href="/quickstart/server"
   >
-    Now build your own custom server to use in Claude for Desktop and other clients
+    Claude for Desktopや他のクライアントで使用するカスタムサーバーを構築
   </Card>
 </CardGroup>
