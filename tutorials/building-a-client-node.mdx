@@ -1,37 +1,37 @@
 <Tab title="Node">
-## System Requirements
+## システム要件
 
-Before starting, ensure your system meets these requirements:
-- Mac or Windows computer
-- Node.js version 16 or higher installed
-- npm (comes with Node.js)
+開始前に、システムが以下の要件を満たしていることを確認してください:
+- MacまたはWindowsコンピュータ
+- Node.jsバージョン16以上がインストール済み
+- npm (Node.jsに同梱)
 
-## Setting Up Your Environment
+## 環境設定
 
-First, create a new Node.js project:
+まず、新しいNode.jsプロジェクトを作成します:
 
 ```bash
-# Create project directory
+# プロジェクトディレクトリを作成
 mkdir mcp-client
 cd mcp-client
 
-# Initialize npm project
+# npmプロジェクトを初期化
 npm init -y
 
-# Install dependencies
+# 依存関係をインストール
 npm install @modelcontextprotocol/sdk @anthropic-ai/sdk dotenv
 npm install -D typescript @types/node
 
-# Create TypeScript config
+# TypeScript設定を作成
 npx tsc --init
 
-# Create necessary files
+# 必要なファイルを作成
 mkdir src
 touch src/client.ts
 touch .env
 ```
 
-Update your `package.json` to add necessary configuration:
+`package.json`に必要な設定を追加します:
 
 ```json
 {
@@ -43,7 +43,7 @@ Update your `package.json` to add necessary configuration:
 }
 ```
 
-Update your `tsconfig.json` with appropriate settings:
+`tsconfig.json`を適切な設定で更新します:
 
 ```json
 {
@@ -62,23 +62,23 @@ Update your `tsconfig.json` with appropriate settings:
 }
 ```
 
-## Setting Up Your API Key
+## APIキーの設定
 
-You'll need an Anthropic API key from the [Anthropic Console](https://console.anthropic.com/settings/keys).
+[Anthropic Console](https://console.anthropic.com/settings/keys)からAnthropic APIキーを取得する必要があります。
 
-Create a `.env` file:
+`.env`ファイルを作成します:
 ```bash
 ANTHROPIC_API_KEY=your_key_here
 ```
 
-Add `.env` to your `.gitignore`:
+`.env`を`.gitignore`に追加します:
 ```bash
 echo ".env" >> .gitignore
 ```
 
-## Creating the Client
+## クライアントの作成
 
-First, let's set up our imports and create the basic client class in `src/client.ts`:
+まず、インポートを設定し、`src/client.ts`に基本的なクライアントクラスを作成します:
 
 ```typescript
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -107,13 +107,13 @@ class MCPClient {
     this.anthropic = new Anthropic();
   }
 
-  // Methods will go here
+  // メソッドはここに追加します
 }
 ```
 
-## Server Connection Management
+## サーバー接続管理
 
-Next, implement the method to connect to an MCP server:
+次に、MCPサーバーに接続するメソッドを実装します:
 
 ```typescript
   async connectToServer(serverScriptPath: string): Promise<void> {
@@ -143,7 +143,7 @@ Next, implement the method to connect to an MCP server:
 
     await this.client.connect(this.transport);
 
-    // List available tools
+    // 利用可能なツールをリストアップ
     const response = await this.client.request(
       { method: "tools/list" },
       ListToolsResultSchema
@@ -156,9 +156,9 @@ Next, implement the method to connect to an MCP server:
   }
 ```
 
-## Query Processing Logic
+## クエリ処理ロジック
 
-Now add the core functionality for processing queries and handling tool calls:
+次に、クエリを処理しツール呼び出しを扱うコア機能を追加します:
 
 ```typescript
   async processQuery(query: string): Promise<string> {
@@ -166,7 +166,7 @@ Now add the core functionality for processing queries and handling tool calls:
       throw new Error("Client not connected");
     }
 
-    // Initialize messages array with user query
+    // ユーザークエリでメッセージ配列を初期化
     let messages: Anthropic.MessageParam[] = [
       {
         role: "user",
@@ -174,7 +174,7 @@ Now add the core functionality for processing queries and handling tool calls:
       },
     ];
 
-    // Get available tools
+    // 利用可能なツールを取得
     const toolsResponse = await this.client.request(
       { method: "tools/list" },
       ListToolsResultSchema
@@ -194,9 +194,9 @@ Now add the core functionality for processing queries and handling tool calls:
       tools: availableTools,
     });
 
-    // Process the response and any tool calls
+    // レスポンスとツール呼び出しを処理
     while (true) {
-      // Add Claude's response to final text and messages
+      // Claudeのレスポンスを最終テキストとメッセージに追加
       for (const content of currentResponse.content) {
         if (content.type === "text") {
           finalText.push(content.text);
@@ -204,7 +204,7 @@ Now add the core functionality for processing queries and handling tool calls:
           const toolName = content.name;
           const toolArgs = content.input;
 
-          // Execute tool call
+          // ツール呼び出しを実行
           const result = await this.client.request(
             {
               method: "tools/call",
@@ -220,13 +220,13 @@ Now add the core functionality for processing queries and handling tool calls:
             `[Calling tool ${toolName} with args ${JSON.stringify(toolArgs)}]`
           );
 
-          // Add Claude's response (including tool use) to messages
+          // Claudeのレスポンス(ツール使用を含む)をメッセージに追加
           messages.push({
             role: "assistant",
             content: currentResponse.content,
           });
 
-          // Add tool result to messages
+          // ツール結果をメッセージに追加
           messages.push({
             role: "user",
             content: [
@@ -240,7 +240,7 @@ Now add the core functionality for processing queries and handling tool calls:
             ],
           });
 
-          // Get next response from Claude with tool results
+          // ツール結果を含むClaudeからの次のレスポンスを取得
           currentResponse = await this.anthropic.messages.create({
             model: "claude-3-5-sonnet-20241022",
             max_tokens: 1000,
@@ -248,17 +248,17 @@ Now add the core functionality for processing queries and handling tool calls:
             tools: availableTools,
           });
 
-          // Add Claude's interpretation of the tool results to final text
+          // ツール結果に対するClaudeの解釈を最終テキストに追加
           if (currentResponse.content[0]?.type === "text") {
             finalText.push(currentResponse.content[0].text);
           }
 
-          // Continue the loop to process any additional tool calls
+          // 追加のツール呼び出しを処理するためにループを継続
           continue;
         }
       }
 
-      // If we reach here, there were no tool calls in the response
+      // ここに到達した場合、レスポンスにツール呼び出しはありませんでした
       break;
     }
 
@@ -267,16 +267,16 @@ Now add the core functionality for processing queries and handling tool calls:
 
 ```
 
-## Interactive Chat Interface
+## 対話型チャットインターフェース
 
-Add the chat loop and cleanup functionality:
+チャットループとクリーンアップ機能を追加します:
 
 ```typescript
   async chatLoop(): Promise<void> {
     console.log("\nMCP Client Started!");
     console.log("Type your queries or 'quit' to exit.");
 
-    // Using Node's readline for console input
+    // コンソール入力にNodeのreadlineを使用
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
@@ -311,12 +311,12 @@ Add the chat loop and cleanup functionality:
   }
 ```
 
-## Main Entry Point
+## メインエントリーポイント
 
-Finally, add the main execution logic outside the class:
+最後に、クラス外部にメイン実行ロジックを追加します:
 
 ```typescript
-// Main execution
+// メイン実行
 async function main() {
   if (process.argv.length < 3) {
     console.log("Usage: ts-node client.ts <path_to_server_script>");
@@ -334,7 +334,7 @@ async function main() {
   }
 }
 
-// Run main if this is the main module
+// メインモジュールの場合にmainを実行
 if (import.meta.url === new URL(process.argv[1], "file:").href) {
   main();
 }
@@ -342,9 +342,9 @@ if (import.meta.url === new URL(process.argv[1], "file:").href) {
 export default MCPClient;
 ```
 
-## Running the Client
+## クライアントの実行
 
-To run your client with any MCP server:
+任意のMCPサーバーでクライアントを実行するには:
 
 ```bash
 # Build the TypeScript code. Make sure to rerun this every time you update `client.ts`!
@@ -355,85 +355,85 @@ node build/client.js path/to/server.py  # for Python servers
 node build/client.js path/to/server.js  # for Node.js servers
 ```
 
-The client will:
-1. Connect to the specified server
-2. List available tools
-3. Start an interactive chat session where you can:
-   - Enter queries
-   - See tool executions
-   - Get responses from Claude
+クライアントは以下の処理を行います:
+1. 指定されたサーバーに接続
+2. 利用可能なツールをリストアップ
+3. 対話型チャットセッションを開始:
+   - クエリを入力可能
+   - ツール実行を確認可能
+   - Claudeからのレスポンスを取得可能
 
-## Key Components Explained
+## 主要コンポーネントの説明
 
-#### 1. Client Initialization
-- The `MCPClient` class initializes with session management and API clients
-- Sets up the MCP client with basic capabilities
-- Configures the Anthropic client for Claude interactions
+#### 1. クライアント初期化
+- `MCPClient`クラスはセッション管理とAPIクライアントで初期化
+- MCPクライアントの基本機能を設定
+- Claudeとの連携用にAnthropicクライアントを構成
 
-#### 2. Server Connection
-- Supports both Python and Node.js servers
-- Validates server script type
-- Sets up proper communication channels
-- Lists available tools on connection
+#### 2. サーバー接続
+- PythonとNode.jsサーバーの両方をサポート
+- サーバースクリプトの種類を検証
+- 適切な通信チャネルを設定
+- 接続時に利用可能なツールをリストアップ
 
-#### 3. Query Processing
-- Maintains conversation context
-- Handles Claude's responses and tool calls
-- Manages the message flow between Claude and tools
-- Combines results into a coherent response
+#### 3. クエリ処理
+- 会話コンテキストを維持
+- Claudeのレスポンスとツール呼び出しを処理
+- Claudeとツール間のメッセージフローを管理
+- 結果を一貫性のあるレスポンスに結合
 
-#### 4. Interactive Interface
-- Provides a simple command-line interface
-- Handles user input and displays responses
-- Includes basic error handling
-- Allows graceful exit
+#### 4. 対話型インターフェース
+- シンプルなコマンドラインインターフェースを提供
+- ユーザー入力の処理とレスポンスの表示
+- 基本的なエラー処理を含む
+- 適切な終了処理を可能にする
 
-#### 5. Resource Management
-- Proper cleanup of resources
-- Error handling for connection issues
-- Graceful shutdown procedures
+#### 5. リソース管理
+- リソースの適切なクリーンアップ
+- 接続問題のエラー処理
+- 適切なシャットダウン手順
 
-### Common Customization Points
+### 主なカスタマイズポイント
 
-1. **Tool Handling**
-   - Modify `processQuery()` to handle specific tool types
-   - Add custom error handling for tool calls
-   - Implement tool-specific response formatting
+1. **ツール処理**
+   - `processQuery()`を修正して特定のツールタイプを処理
+   - ツール呼び出しのカスタムエラー処理を追加
+   - ツール固有のレスポンスフォーマットを実装
 
-2. **Response Processing**
-   - Customize how tool results are formatted
-   - Add response filtering or transformation
-   - Implement custom logging
+2. **レスポンス処理**
+   - ツール結果のフォーマット方法をカスタマイズ
+   - レスポンスフィルタリングや変換を追加
+   - カスタムロギングを実装
 
-3. **User Interface**
-   - Add a GUI or web interface
-   - Implement rich console output
-   - Add command history or auto-completion
+3. **ユーザーインターフェース**
+   - GUIやWebインターフェースを追加
+   - リッチなコンソール出力を実装
+   - コマンド履歴やオートコンプリートを追加
 
-### Best Practices
+### ベストプラクティス
 
-1. **Error Handling**
-   - Always wrap tool calls in try-catch blocks
-   - Provide meaningful error messages
-   - Gracefully handle connection issues
+1. **エラー処理**
+   - ツール呼び出しは常にtry-catchブロックで囲む
+   - 意味のあるエラーメッセージを提供
+   - 接続問題を適切に処理
 
-2. **Resource Management**
-   - Use proper cleanup methods
-   - Close connections when done
-   - Handle server disconnections
+2. **リソース管理**
+   - 適切なクリーンアップ方法を使用
+   - 接続終了時に確実にクローズ
+   - サーバー切断を適切に処理
 
-3. **Security**
-   - Store API keys securely in `.env`
-   - Validate server responses
-   - Be cautious with tool permissions
+3. **セキュリティ**
+   - APIキーは`.env`ファイルに安全に保管
+   - サーバーからのレスポンスを検証
+   - ツールの権限に注意
 
-### Troubleshooting
+### トラブルシューティング
 
-#### Server Path Issues
-- Double-check the path to your server script
-- Use absolute paths if relative paths aren't working
-- For Windows users, use forward slashes (/) or escaped backslashes (\\)
-- Verify the server file has the correct extension (.py or .js)
+#### サーバーパスに関する問題
+- サーバースクリプトへのパスを再確認
+- 相対パスが機能しない場合は絶対パスを使用
+- Windowsユーザーはフォワードスラッシュ(/)またはエスケープされたバックスラッシュ(\\\\)を使用
+- サーバーファイルの拡張子(.pyまたは.js)が正しいことを確認
 
 Example of correct path usage:
 ```bash
@@ -448,15 +448,15 @@ node build/client.js C:/projects/mcp-server/weather.js
 node build/client.js C:\\projects\\mcp-server\\weather.js
 ```
 
-#### Connection Issues
-- Verify the server script exists and has correct permissions
-- Check that the server script is executable
-- Ensure the server script's dependencies are installed
-- Try running the server script directly to check for errors
+#### 接続に関する問題
+- サーバースクリプトが存在し、適切な権限があることを確認
+- サーバースクリプトが実行可能であることを確認
+- サーバースクリプトの依存関係がインストールされていることを確認
+- サーバースクリプトを直接実行してエラーを確認
 
-#### Tool Execution Issues
-- Check server logs for error messages
-- Verify tool input arguments match the schema
-- Ensure tool dependencies are available
-- Add debug logging to track execution flow
+#### ツール実行に関する問題
+- サーバーログを確認してエラーメッセージをチェック
+- ツール入力引数がスキーマと一致していることを確認
+- ツールの依存関係が利用可能であることを確認
+- デバッグログを追加して実行フローを追跡
 </Tab>

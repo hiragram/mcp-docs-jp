@@ -1,139 +1,138 @@
 ---
-title: MCP Server
-description: Learn how to implement and configure a Model Context Protocol (MCP) server
+title: MCPサーバー
+description: Model Context Protocol (MCP)サーバーの実装と設定方法
 ---
 
 <Note>
-### Breaking Changes in 0.8.x ⚠️
-**Note:** Version 0.8.x introduces several breaking changes including a new session-based architecture. 
-If you're upgrading from 0.7.0, please refer to the [Migration Guide](https://github.com/modelcontextprotocol/java-sdk/blob/main/migration-0.8.0.md) for detailed instructions.
+### 0.8.xでの破壊的変更 ⚠️
+**注意:** バージョン0.8.xでは、新しいセッションベースのアーキテクチャを含むいくつかの破壊的変更が導入されています。
+0.7.0からアップグレードする場合は、詳細な手順について[移行ガイド](https://github.com/modelcontextprotocol/java-sdk/blob/main/migration-0.8.0.md)を参照してください。
 </Note>
 
-## Overview
+## 概要
 
-The MCP Server is a foundational component in the Model Context Protocol (MCP) architecture that provides tools, resources, and capabilities to clients. It implements the server-side of the protocol, responsible for:
+MCPサーバーは、Model Context Protocol (MCP)アーキテクチャにおける基盤コンポーネントで、クライアントにツール、リソース、機能を提供します。プロトコルのサーバー側を実装し、以下の責務を担います:
 
-- Exposing tools that clients can discover and execute
-- Managing resources with URI-based access patterns
-- Providing prompt templates and handling prompt requests
-- Supporting capability negotiation with clients
-- Implementing server-side protocol operations
-- Managing concurrent client connections
-- Providing structured logging and notifications
+- クライアントが発見・実行可能なツールの公開
+- URIベースのアクセスパターンによるリソース管理
+- プロンプトテンプレートの提供とプロンプトリクエストの処理
+- クライアントとの機能ネゴシエーションのサポート
+- サーバー側プロトコル操作の実装
+- 並行クライアント接続の管理
+- 構造化ロギングと通知の提供
 
 <Tip>
-The core `io.modelcontextprotocol.sdk:mcp` module provides STDIO and SSE server transport implementations  without requiring external web frameworks. 
+コアモジュール`io.modelcontextprotocol.sdk:mcp`は、外部のWebフレームワークを必要とせずにSTDIOおよびSSEサーバートランスポート実装を提供します。
 
-Spring-specific transport implementations are available as an **optional** dependencies `io.modelcontextprotocol.sdk:mcp-spring-webflux`, `io.modelcontextprotocol.sdk:mcp-spring-webmvc` for [Spring Framework](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html) users.
+Spring固有のトランスポート実装は、**オプション**の依存関係`io.modelcontextprotocol.sdk:mcp-spring-webflux`、`io.modelcontextprotocol.sdk:mcp-spring-webmvc`として[Spring Framework](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html)ユーザー向けに利用可能です。
 </Tip>
 
-
-The server supports both synchronous and asynchronous APIs, allowing for flexible integration in different application contexts.
+サーバーは同期APIと非同期APIの両方をサポートしており、さまざまなアプリケーションコンテキストでの柔軟な統合が可能です。
 
 <Tabs>
-  <Tab title="Sync API">
+  <Tab title="同期API">
 ```java
-// Create a server with custom configuration
+// カスタム設定でサーバーを作成
 McpSyncServer syncServer = McpServer.sync(transportProvider)
     .serverInfo("my-server", "1.0.0")
     .capabilities(ServerCapabilities.builder()
-        .resources(true)     // Enable resource support
-        .tools(true)         // Enable tool support
-        .prompts(true)       // Enable prompt support
-        .logging()           // Enable logging support
+        .resources(true)     // リソースサポートを有効化
+        .tools(true)         // ツールサポートを有効化
+        .prompts(true)       // プロンプトサポートを有効化
+        .logging()           // ロギングサポートを有効化
         .build())
     .build();
 
-// Register tools, resources, and prompts
+// ツール、リソース、プロンプトを登録
 syncServer.addTool(syncToolSpecification);
 syncServer.addResource(syncResourceSpecification);
 syncServer.addPrompt(syncPromptSpecification);
 
-// Send logging notifications
+// ログ通知を送信
 syncServer.loggingNotification(LoggingMessageNotification.builder()
     .level(LoggingLevel.INFO)
     .logger("custom-logger")
-    .data("Server initialized")
+    .data("サーバー初期化完了")
     .build());
 
-// Close the server when done
+// 完了後サーバーをクローズ
 syncServer.close();
 ```
   </Tab>
 
-  <Tab title="Async API">
+  <Tab title="非同期API">
 ```java
-// Create an async server with custom configuration
+// カスタム設定で非同期サーバーを作成
 McpAsyncServer asyncServer = McpServer.async(transportProvider)
     .serverInfo("my-server", "1.0.0")
     .capabilities(ServerCapabilities.builder()
-        .resources(true)     // Enable resource support
-        .tools(true)         // Enable tool support
-        .prompts(true)       // Enable prompt support
-        .logging()           // Enable logging support
+        .resources(true)     // リソースサポートを有効化
+        .tools(true)         // ツールサポートを有効化
+        .prompts(true)       // プロンプトサポートを有効化
+        .logging()           // ロギングサポートを有効化
         .build())
     .build();
 
-// Register tools, resources, and prompts
+// ツール、リソース、プロンプトを登録
 asyncServer.addTool(asyncToolSpecification)
-    .doOnSuccess(v -> logger.info("Tool registered"))
+    .doOnSuccess(v -> logger.info("ツール登録完了"))
     .subscribe();
 
 asyncServer.addResource(asyncResourceSpecification)
-    .doOnSuccess(v -> logger.info("Resource registered"))
+    .doOnSuccess(v -> logger.info("リソース登録完了"))
     .subscribe();
 
 asyncServer.addPrompt(asyncPromptSpecification)
-    .doOnSuccess(v -> logger.info("Prompt registered"))
+    .doOnSuccess(v -> logger.info("プロンプト登録完了"))
     .subscribe();
 
-// Send logging notifications
+// ログ通知を送信
 asyncServer.loggingNotification(LoggingMessageNotification.builder()
     .level(LoggingLevel.INFO)
     .logger("custom-logger")
-    .data("Server initialized")
+    .data("サーバー初期化完了")
     .build());
 
-// Close the server when done
+// 完了後サーバーをクローズ
 asyncServer.close()
-    .doOnSuccess(v -> logger.info("Server closed"))
+    .doOnSuccess(v -> logger.info("サーバークローズ完了"))
     .subscribe();
 ```
   </Tab>
 </Tabs>
 
 
-## Server Transport Providers
+## サーバートランスポートプロバイダー
 
-The transport layer in the MCP SDK is responsible for handling the communication between clients and servers. 
-It provides different implementations to support various communication protocols and patterns. 
-The SDK includes several built-in transport provider implementations:
+MCP SDKのトランスポート層は、クライアントとサーバー間の通信を処理します。
+さまざまな通信プロトコルとパターンをサポートするための異なる実装を提供します。
+SDKにはいくつかの組み込みトランスポートプロバイダー実装が含まれています:
 
 <Tabs>
   
   <Tab title="STDIO">
     <>
-      Create in-process based transport:
+      プロセスベースのトランスポートを作成:
 
       ```java
       StdioServerTransportProvider transportProvider = new StdioServerTransportProvider(new ObjectMapper());
       ```
 
-      Provides bidirectional JSON-RPC message handling over standard input/output streams with non-blocking message processing, serialization/deserialization, and graceful shutdown support.
+      標準入力/出力ストリームを介した双方向JSON-RPCメッセージ処理を提供し、非ブロッキングメッセージ処理、シリアル化/デシリアル化、グレースフルシャットダウンをサポートします。
 
-      Key features:
+      主な機能:
       <ul>
-        <li>Bidirectional communication through stdin/stdout</li>
-        <li>Process-based integration support</li>
-        <li>Simple setup and configuration</li>
-        <li>Lightweight implementation</li>
+        <li>stdin/stdoutを介した双方向通信</li>
+        <li>プロセスベースの統合サポート</li>
+        <li>シンプルなセットアップと設定</li>
+        <li>軽量な実装</li>
       </ul>
     </>
   </Tab>
 
 <Tab title="SSE (WebFlux)">
   <>
-    <p>Creates WebFlux-based SSE server transport.<br />Requires the <code>mcp-spring-webflux</code> dependency.</p>
+    <p>WebFluxベースのSSEサーバートランスポートを作成します。<br />`mcp-spring-webflux`依存関係が必要です。</p>
 
     ```java
     @Configuration
@@ -150,12 +149,12 @@ The SDK includes several built-in transport provider implementations:
     }
     ```
 
-    <p>Implements the MCP HTTP with SSE transport specification, providing:</p>
+    <p>MCP HTTP with SSEトランスポート仕様を実装し、以下を提供します:</p>
     <ul>
-      <li>Reactive HTTP streaming with WebFlux</li>
-      <li>Concurrent client connections through SSE endpoints</li>
-      <li>Message routing and session management</li>
-      <li>Graceful shutdown capabilities</li>
+      <li>WebFluxを使用したリアクティブHTTPストリーミング</li>
+      <li>SSEエンドポイントを介した並行クライアント接続</li>
+      <li>メッセージルーティングとセッション管理</li>
+      <li>グレースフルシャットダウン機能</li>
     </ul>
   </>
 </Tab>
@@ -163,7 +162,7 @@ The SDK includes several built-in transport provider implementations:
 
 <Tab title="SSE (WebMvc)">
   <>
-    <p>Creates WebMvc-based SSE server transport.<br />Requires the <code>mcp-spring-webmvc</code> dependency.</p>
+    <p>WebMvcベースのSSEサーバートランスポートを作成します。<br />`mcp-spring-webmvc`依存関係が必要です。</p>
 
     ```java
     @Configuration
@@ -181,12 +180,12 @@ The SDK includes several built-in transport provider implementations:
     }
     ```
 
-    <p>Implements the MCP HTTP with SSE transport specification, providing:</p>
+    <p>MCP HTTP with SSEトランスポート仕様を実装し、以下を提供します:</p>
     <ul>
-      <li>Server-side event streaming</li>
-      <li>Integration with Spring WebMVC</li>
-      <li>Support for traditional web applications</li>
-      <li>Synchronous operation handling</li>
+      <li>サーバーサイドイベントストリーミング</li>
+      <li>Spring WebMVCとの統合</li>
+      <li>従来のWebアプリケーションのサポート</li>
+      <li>同期操作処理</li>
     </ul>
   </>
 </Tab>
@@ -195,9 +194,9 @@ The SDK includes several built-in transport provider implementations:
 <Tab title="SSE (Servlet)">
   <>
     <p>
-      Creates a Servlet-based SSE server transport. It is included in the core <code>mcp</code> module.<br />
-      The <code>HttpServletSseServerTransport</code> can be used with any Servlet container.<br />
-      To use it with a Spring Web application, you can register it as a Servlet bean:
+      ServletベースのSSEサーバートランスポートを作成します。コア`mcp`モジュールに含まれています。<br />
+      `HttpServletSseServerTransport`は任意のServletコンテナで使用できます。<br />
+      Spring Webアプリケーションで使用する場合、Servletビーンとして登録できます:
     </p>
 
     ```java
@@ -218,20 +217,20 @@ The SDK includes several built-in transport provider implementations:
     ```
 
     <p>
-      Implements the MCP HTTP with SSE transport specification using the traditional Servlet API, providing:
+      従来のServlet APIを使用してMCP HTTP with SSEトランスポート仕様を実装し、以下を提供します:
     </p>
     <ul>
-      <li>Asynchronous message handling using Servlet 6.0 async support</li>
-      <li>Session management for multiple client connections</li>
+      <li>Servlet 6.0非同期サポートを使用したメッセージ処理</li>
+      <li>複数クライアント接続のセッション管理</li>
       <li>
-        Two types of endpoints:
+        2種類のエンドポイント:
         <ul>
-          <li>SSE endpoint (<code>/sse</code>) for server-to-client events</li>
-          <li>Message endpoint (configurable) for client-to-server requests</li>
+          <li>サーバーからクライアントへのイベント用SSEエンドポイント(`/sse`)</li>
+          <li>クライアントからサーバーへのリクエスト用メッセージエンドポイント(設定可能)</li>
         </ul>
       </li>
-      <li>Error handling and response formatting</li>
-      <li>Graceful shutdown support</li>
+      <li>エラーハンドリングとレスポンスフォーマット</li>
+      <li>グレースフルシャットダウンサポート</li>
     </ul>
   </>
 </Tab>
@@ -239,45 +238,45 @@ The SDK includes several built-in transport provider implementations:
 </Tabs>
 
 
-## Server Capabilities
+## サーバー機能
 
-The server can be configured with various capabilities:
+サーバーはさまざまな機能で設定できます:
 
 ```java
 var capabilities = ServerCapabilities.builder()
-    .resources(false, true)  // Resource support with list changes notifications
-    .tools(true)            // Tool support with list changes notifications
-    .prompts(true)          // Prompt support with list changes notifications
-    .logging()              // Enable logging support (enabled by default with logging level INFO)
+    .resources(false, true)  // リソースサポートとリスト変更通知
+    .tools(true)            // ツールサポートとリスト変更通知
+    .prompts(true)          // プロンプトサポートとリスト変更通知
+    .logging()              // ロギングサポートを有効化(デフォルトでINFOレベル)
     .build();
 ```
 
-### Logging Support
+### ロギングサポート
 
-The server provides structured logging capabilities that allow sending log messages to clients with different severity levels:
+サーバーは構造化ロギング機能を提供し、さまざまな重大度レベルのログメッセージをクライアントに送信できます:
 
 ```java
-// Send a log message to clients
+// クライアントにログメッセージを送信
 server.loggingNotification(LoggingMessageNotification.builder()
     .level(LoggingLevel.INFO)
     .logger("custom-logger")
-    .data("Custom log message")
+    .data("カスタムログメッセージ")
     .build());
 ```
 
-Clients can control the minimum logging level they receive through the `mcpClient.setLoggingLevel(level)` request. Messages below the set level will be filtered out.
-Supported logging levels (in order of increasing severity): DEBUG (0), INFO (1), NOTICE (2), WARNING (3), ERROR (4), CRITICAL (5), ALERT (6), EMERGENCY (7)
+クライアントは`mcpClient.setLoggingLevel(level)`リクエストを通じて受信する最小ログレベルを制御できます。設定レベル未満のメッセージはフィルタリングされます。
+サポートされるログレベル(重大度の昇順): DEBUG (0), INFO (1), NOTICE (2), WARNING (3), ERROR (4), CRITICAL (5), ALERT (6), EMERGENCY (7)
 
-### Tool Specification
+### ツール仕様
 
-The Model Context Protocol allows servers to [expose tools](https://spec.modelcontextprotocol.io/specification/2024-11-05/server/tools/) that can be invoked by language models. 
-The Java SDK allows implementing a Tool Specifications with their handler functions. 
-Tools enable AI models to perform calculations, access external APIs, query databases, and manipulate files:
+Model Context Protocolでは、サーバーが[ツールを公開](https://spec.modelcontextprotocol.io/specification/2024-11-05/server/tools/)し、言語モデルが呼び出せるようにします。
+Java SDKでは、ツール仕様とそのハンドラー関数を実装できます。
+ツールにより、AIモデルは計算の実行、外部APIへのアクセス、データベースのクエリ、ファイルの操作などが可能になります:
 
 <Tabs>
-  <Tab title="Sync">
+  <Tab title="同期">
 ```java
-// Sync tool specification
+// 同期ツール仕様
 var schema = """
             {
               "type" : "object",
@@ -296,18 +295,18 @@ var schema = """
             }
             """;
 var syncToolSpecification = new McpServerFeatures.SyncToolSpecification(
-    new Tool("calculator", "Basic calculator", schema),
+    new Tool("calculator", "基本計算機", schema),
     (exchange, arguments) -> {
-        // Tool implementation
+        // ツール実装
         return new CallToolResult(result, false);
     }
 );
 ```
   </Tab>
 
-  <Tab title="Async">
+  <Tab title="非同期">
 ```java
-// Async tool specification
+// 非同期ツール仕様
 var schema = """
             {
               "type" : "object",
@@ -326,9 +325,9 @@ var schema = """
             }
             """;
 var asyncToolSpecification = new McpServerFeatures.AsyncToolSpecification(
-    new Tool("calculator", "Basic calculator", schema),
+    new Tool("calculator", "基本計算機", schema),
     (exchange, arguments) -> {
-        // Tool implementation
+        // ツール実装
         return Mono.just(new CallToolResult(result, false));
     }
 );
@@ -336,36 +335,36 @@ var asyncToolSpecification = new McpServerFeatures.AsyncToolSpecification(
   </Tab>
 </Tabs>
 
-The Tool specification includes a Tool definition with `name`, `description`, and `parameter schema` followed by a call handler that implements the tool's logic. 
-The function's first argument is `McpAsyncServerExchange` for client interaction, and the second is a map of tool arguments.
+ツール仕様には、`name`、`description`、`parameter schema`を含むツール定義と、ツールのロジックを実装する呼び出しハンドラーが含まれます。
+関数の最初の引数はクライアント相互作用のための`McpAsyncServerExchange`、2番目の引数はツール引数のマップです。
 
-### Resource Specification
+### リソース仕様
 
-Specification of a resource with its handler function. 
-Resources provide context to AI models by exposing data such as: File contents, Database records, API responses, System information, Application state.
-Example resource specification:
+リソースとそのハンドラー関数の仕様。
+リソースは、ファイル内容、データベースレコード、APIレスポンス、システム情報、アプリケーション状態などのデータを公開することで、AIモデルにコンテキストを提供します。
+リソース仕様の例:
 
 <Tabs>
-  <Tab title="Sync">
+  <Tab title="同期">
 ```java
-// Sync resource specification
+// 同期リソース仕様
 var syncResourceSpecification = new McpServerFeatures.syncResourceSpecification(
     new Resource("custom://resource", "name", "description", "mime-type", null),
     (exchange, request) -> {
-        // Resource read implementation
+        // リソース読み取り実装
         return new ReadResourceResult(contents);
     }
 );
 ```
   </Tab>
 
-  <Tab title="Async">
+  <Tab title="非同期">
 ```java
-// Async resource specification
+// 非同期リソース仕様
 var asyncResourceSpecification = new McpServerFeatures.asyncResourceSpecification(
     new Resource("custom://resource", "name", "description", "mime-type", null),
     (exchange, request) -> {
-        // Resource read implementation
+        // リソース読み取り実装
         return Mono.just(new ReadResourceResult(contents));
     }
 );
@@ -373,42 +372,41 @@ var asyncResourceSpecification = new McpServerFeatures.asyncResourceSpecificatio
   </Tab>
 </Tabs>
 
-The resource specification comprised of resource definitions and resource read handler.
-The resource definition including `name`, `description`, and `MIME type`.
-The first argument of the function that handles resource read requests is an `McpAsyncServerExchange` upon which the server can
-interact with the connected client. 
-The second arguments is a `McpSchema.ReadResourceRequest`.
+リソース仕様は、リソース定義とリソース読み取りハンドラーで構成されます。
+リソース定義には`name`、`description`、`MIME type`が含まれます。
+リソース読み取りリクエストを処理する関数の最初の引数は、サーバーが接続されたクライアントと相互作用できる`McpAsyncServerExchange`です。
+2番目の引数は`McpSchema.ReadResourceRequest`です。
 
-### Prompt Specification
+### プロンプト仕様
 
-As part of the [Prompting capabilities](https://spec.modelcontextprotocol.io/specification/2024-11-05/server/prompts/), MCP provides a standardized way for servers to expose prompt templates to clients. 
-The Prompt Specification is a structured template for AI model interactions that enables consistent message formatting, parameter substitution, context injection, response formatting, and instruction templating.
+[プロンプト機能](https://spec.modelcontextprotocol.io/specification/2024-11-05/server/prompts/)の一部として、MCPはサーバーがクライアントにプロンプトテンプレートを公開する標準化された方法を提供します。
+プロンプト仕様は、AIモデル相互作用のための構造化テンプレートで、一貫したメッセージフォーマット、パラメータ置換、コンテキスト注入、レスポンスフォーマット、命令テンプレートを可能にします。
 
 <Tabs>
-  <Tab title="Sync">
+  <Tab title="同期">
 ```java
-// Sync prompt specification
+// 同期プロンプト仕様
 var syncPromptSpecification = new McpServerFeatures.syncPromptSpecification(
     new Prompt("greeting", "description", List.of(
         new PromptArgument("name", "description", true)
     )),
     (exchange, request) -> {
-        // Prompt implementation
+        // プロンプト実装
         return new GetPromptResult(description, messages);
     }
 );
 ```
   </Tab>
 
-  <Tab title="Async">
+  <Tab title="非同期">
 ```java
-// Async prompt specification
+// 非同期プロンプト仕様
 var asyncPromptSpecification = new McpServerFeatures.asyncPromptSpecification(
     new Prompt("greeting", "description", List.of(
         new PromptArgument("name", "description", true)
     )),
     (exchange, request) -> {
-        // Prompt implementation
+        // プロンプト実装
         return Mono.just(new GetPromptResult(description, messages));
     }
 );
@@ -416,117 +414,117 @@ var asyncPromptSpecification = new McpServerFeatures.asyncPromptSpecification(
   </Tab>
 </Tabs>
 
-The prompt definition includes name (identifier for the prompt), description (purpose of the prompt), and list of arguments (parameters for templating).
-The handler function processes requests and returns formatted templates. 
-The first argument is `McpAsyncServerExchange` for client interaction, and the second argument is a `GetPromptRequest` instance.
+プロンプト定義には、名前(プロンプトの識別子)、説明(プロンプトの目的)、引数のリスト(テンプレート用パラメータ)が含まれます。
+ハンドラー関数はリクエストを処理し、フォーマットされたテンプレートを返します。
+最初の引数はクライアント相互作用のための`McpAsyncServerExchange`、2番目の引数は`GetPromptRequest`インスタンスです。
 
-### Using Sampling from a Server
+### サーバーからのサンプリング使用
 
-To use [Sampling capabilities](https://spec.modelcontextprotocol.io/specification/2024-11-05/client/sampling/), connect to a client that supports sampling. 
-No special server configuration is needed, but verify client sampling support before making requests.
-Learn about [client sampling support](./mcp-client#sampling-support).
+[サンプリング機能](https://spec.modelcontextprotocol.io/specification/2024-11-05/client/sampling/)を使用するには、サンプリングをサポートするクライアントに接続します。
+特別なサーバー設定は不要ですが、リクエストを行う前にクライアントのサンプリングサポートを確認してください。
+[クライアントサンプリングサポート](./mcp-client#sampling-support)について学びます。
 
-Once connected to a compatible client, the server can request language model generations:
+互換性のあるクライアントに接続すると、サーバーは言語モデルの生成をリクエストできます:
 
 <Tabs>
-  <Tab title="Sync API">
+  <Tab title="同期API">
 ```java
-// Create a server
+// サーバーを作成
 McpSyncServer server = McpServer.sync(transportProvider)
     .serverInfo("my-server", "1.0.0")
     .build();
 
-// Define a tool that uses sampling
+// サンプリングを使用するツールを定義
 var calculatorTool = new McpServerFeatures.SyncToolSpecification(
-    new Tool("ai-calculator", "Performs calculations using AI", schema),
+    new Tool("ai-calculator", "AIを使用して計算を実行", schema),
     (exchange, arguments) -> {
-        // Check if client supports sampling
+        // クライアントがサンプリングをサポートしているか確認
         if (exchange.getClientCapabilities().sampling() == null) {
-            return new CallToolResult("Client does not support AI capabilities", false);
+            return new CallToolResult("クライアントはAI機能をサポートしていません", false);
         }
         
-        // Create a sampling request
+        // サンプリングリクエストを作成
         McpSchema.CreateMessageRequest request = McpSchema.CreateMessageRequest.builder()
-            .content(new McpSchema.TextContent("Calculate: " + arguments.get("expression")))
+            .content(new McpSchema.TextContent("計算: " + arguments.get("expression")))
             .modelPreferences(McpSchema.ModelPreferences.builder()
                 .hints(List.of(
                     McpSchema.ModelHint.of("claude-3-sonnet"),
                     McpSchema.ModelHint.of("claude")
                 ))
-                .intelligencePriority(0.8)  // Prioritize intelligence
-                .speedPriority(0.5)         // Moderate speed importance
+                .intelligencePriority(0.8)  // 知性を優先
+                .speedPriority(0.5)         // 中程度の速度重要性
                 .build())
-            .systemPrompt("You are a helpful calculator assistant. Provide only the numerical answer.")
+            .systemPrompt("あなたは親切な計算アシスタントです。数値の答えのみを提供してください。")
             .maxTokens(100)
             .build();
         
-        // Request sampling from the client
+        // クライアントにサンプリングをリクエスト
         McpSchema.CreateMessageResult result = exchange.createMessage(request);
         
-        // Process the result
+        // 結果を処理
         String answer = result.content().text();
         return new CallToolResult(answer, false);
     }
 );
 
-// Add the tool to the server
+// ツールをサーバーに追加
 server.addTool(calculatorTool);
 ```
   </Tab>
 
-  <Tab title="Async API">
+  <Tab title="非同期API">
 ```java
-// Create a server
+// サーバーを作成
 McpAsyncServer server = McpServer.async(transportProvider)
     .serverInfo("my-server", "1.0.0")
     .build();
 
-// Define a tool that uses sampling
+// サンプリングを使用するツールを定義
 var calculatorTool = new McpServerFeatures.AsyncToolSpecification(
-    new Tool("ai-calculator", "Performs calculations using AI", schema),
+    new Tool("ai-calculator", "AIを使用して計算を実行", schema),
     (exchange, arguments) -> {
-        // Check if client supports sampling
+        // クライアントがサンプリングをサポートしているか確認
         if (exchange.getClientCapabilities().sampling() == null) {
-            return Mono.just(new CallToolResult("Client does not support AI capabilities", false));
+            return Mono.just(new CallToolResult("クライアントはAI機能をサポートしていません", false));
         }
         
-        // Create a sampling request
+        // サンプリングリクエストを作成
         McpSchema.CreateMessageRequest request = McpSchema.CreateMessageRequest.builder()
-            .content(new McpSchema.TextContent("Calculate: " + arguments.get("expression")))
+            .content(new McpSchema.TextContent("計算: " + arguments.get("expression")))
             .modelPreferences(McpSchema.ModelPreferences.builder()
                 .hints(List.of(
                     McpSchema.ModelHint.of("claude-3-sonnet"),
                     McpSchema.ModelHint.of("claude")
                 ))
-                .intelligencePriority(0.8)  // Prioritize intelligence
-                .speedPriority(0.5)         // Moderate speed importance
+                .intelligencePriority(0.8)  // 知性を優先
+                .speedPriority(0.5)         // 中程度の速度重要性
                 .build())
-            .systemPrompt("You are a helpful calculator assistant. Provide only the numerical answer.")
+            .systemPrompt("あなたは親切な計算アシスタントです。数値の答えのみを提供してください。")
             .maxTokens(100)
             .build();
         
-        // Request sampling from the client
+        // クライアントにサンプリングをリクエスト
         return exchange.createMessage(request)
             .map(result -> {
-                // Process the result
+                // 結果を処理
                 String answer = result.content().text();
                 return new CallToolResult(answer, false);
             });
     }
 );
 
-// Add the tool to the server
+// ツールをサーバーに追加
 server.addTool(calculatorTool)
     .subscribe();
 ```
   </Tab>
 </Tabs>
 
-The `CreateMessageRequest` object allows you to specify: `Content` - the input text or image for the model, 
-`Model Preferences` - hints and priorities for model selection, `System Prompt` - instructions for the model's behavior and 
-`Max Tokens` - maximum length of the generated response.
+`CreateMessageRequest`オブジェクトでは以下を指定できます: `Content` - モデルへの入力テキストまたは画像、
+`Model Preferences` - モデル選択のヒントと優先度、`System Prompt` - モデルの動作に関する指示、
+`Max Tokens` - 生成されるレスポンスの最大長さ。
 
 
-## Error Handling
+## エラーハンドリング
 
-The SDK provides comprehensive error handling through the McpError class, covering protocol compatibility, transport communication, JSON-RPC messaging, tool execution, resource management, prompt handling, timeouts, and connection issues. This unified error handling approach ensures consistent and reliable error management across both synchronous and asynchronous operations.
+SDKは、McpErrorクラスを通じて包括的なエラーハンドリングを提供し、プロトコル互換性、トランスポート通信、JSON-RPCメッセージング、ツール実行、リソース管理、プロンプト処理、タイムアウト、接続問題をカバーします。この統一されたエラーハンドリングアプローチにより、同期操作と非同期操作の両方で一貫性のある信頼性の高いエラー管理が保証されます。
