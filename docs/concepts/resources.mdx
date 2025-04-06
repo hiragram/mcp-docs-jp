@@ -1,146 +1,146 @@
 ---
-title: "Resources"
-description: "Expose data and content from your servers to LLMs"
+title: "リソース"
+description: "サーバーからLLMにデータやコンテンツを公開する"
 ---
 
-Resources are a core primitive in the Model Context Protocol (MCP) that allow servers to expose data and content that can be read by clients and used as context for LLM interactions.
+リソースはModel Context Protocol (MCP)のコアプリミティブであり、サーバーがクライアントに読み取らせ、LLMインタラクションのコンテキストとして使用できるデータやコンテンツを公開できます。
 
 <Note>
-  Resources are designed to be **application-controlled**, meaning that the client application can decide how and when they should be used.
-  Different MCP clients may handle resources differently. For example:
-  - Claude Desktop currently requires users to explicitly select resources before they can be used
-  - Other clients might automatically select resources based on heuristics
-  - Some implementations may even allow the AI model itself to determine which resources to use
+  リソースは**アプリケーション制御**を目的として設計されており、クライアントアプリケーションがそれらをいつどのように使用するかを決定できます。
+  異なるMCPクライアントはリソースを異なる方法で扱う場合があります。例えば：
+  - Claude Desktopは現在、リソースを使用する前にユーザーが明示的に選択する必要があります
+  - 他のクライアントはヒューリスティックに基づいて自動的にリソースを選択するかもしれません
+  - 一部の実装では、AIモデル自体が使用するリソースを決定できる場合もあります
 
-  Server authors should be prepared to handle any of these interaction patterns when implementing resource support. In order to expose data to models automatically, server authors should use a **model-controlled** primitive such as [Tools](./tools).
+  サーバー開発者は、リソースサポートを実装する際にこれらのインタラクションパターンのいずれにも対応できるように準備する必要があります。モデルにデータを自動的に公開するには、サーバー開発者は[ツール](./tools)などの**モデル制御**プリミティブを使用する必要があります。
 </Note>
 
-## Overview
+## 概要
 
-Resources represent any kind of data that an MCP server wants to make available to clients. This can include:
+リソースは、MCPサーバーがクライアントに利用可能にしたいあらゆる種類のデータを表します。これには以下が含まれます：
 
-- File contents
-- Database records
-- API responses
-- Live system data
-- Screenshots and images
-- Log files
-- And more
+- ファイル内容
+- データベースレコード
+- APIレスポンス
+- ライブシステムデータ
+- スクリーンショットや画像
+- ログファイル
+- その他
 
-Each resource is identified by a unique URI and can contain either text or binary data.
+各リソースは一意のURIで識別され、テキストまたはバイナリデータを含むことができます。
 
-## Resource URIs
+## リソースURI
 
-Resources are identified using URIs that follow this format:
+リソースは以下の形式のURIを使用して識別されます：
 
 ```
 [protocol]://[host]/[path]
 ```
 
-For example:
+例：
 - `file:///home/user/documents/report.pdf`
 - `postgres://database/customers/schema`
 - `screen://localhost/display1`
 
-The protocol and path structure is defined by the MCP server implementation. Servers can define their own custom URI schemes.
+プロトコルとパス構造はMCPサーバーの実装によって定義されます。サーバーは独自のカスタムURIスキームを定義できます。
 
-## Resource types
+## リソースタイプ
 
-Resources can contain two types of content:
+リソースには2種類のコンテンツを含めることができます：
 
-### Text resources
+### テキストリソース
 
-Text resources contain UTF-8 encoded text data. These are suitable for:
-- Source code
-- Configuration files
-- Log files
-- JSON/XML data
-- Plain text
+テキストリソースにはUTF-8でエンコードされたテキストデータが含まれます。以下に適しています：
+- ソースコード
+- 設定ファイル
+- ログファイル
+- JSON/XMLデータ
+- プレーンテキスト
 
-### Binary resources
+### バイナリリソース
 
-Binary resources contain raw binary data encoded in base64. These are suitable for:
-- Images
-- PDFs
-- Audio files
-- Video files
-- Other non-text formats
+バイナリリソースにはbase64でエンコードされた生のバイナリデータが含まれます。以下に適しています：
+- 画像
+- PDF
+- 音声ファイル
+- 動画ファイル
+- その他の非テキスト形式
 
-## Resource discovery
+## リソースの発見
 
-Clients can discover available resources through two main methods:
+クライアントは2つの主要な方法で利用可能なリソースを発見できます：
 
-### Direct resources
+### 直接リソース
 
-Servers expose a list of concrete resources via the `resources/list` endpoint. Each resource includes:
-
-```typescript
-{
-  uri: string;           // Unique identifier for the resource
-  name: string;          // Human-readable name
-  description?: string;  // Optional description
-  mimeType?: string;     // Optional MIME type
-}
-```
-
-### Resource templates
-
-For dynamic resources, servers can expose [URI templates](https://datatracker.ietf.org/doc/html/rfc6570) that clients can use to construct valid resource URIs:
+サーバーは`resources/list`エンドポイントを介して具体的なリソースのリストを公開します。各リソースには以下が含まれます：
 
 ```typescript
 {
-  uriTemplate: string;   // URI template following RFC 6570
-  name: string;          // Human-readable name for this type
-  description?: string;  // Optional description
-  mimeType?: string;     // Optional MIME type for all matching resources
+  uri: string;           // リソースの一意な識別子
+  name: string;          // 人間が読める名前
+  description?: string;  // オプションの説明
+  mimeType?: string;     // オプションのMIMEタイプ
 }
 ```
 
-## Reading resources
+### リソーステンプレート
 
-To read a resource, clients make a `resources/read` request with the resource URI.
+動的リソースの場合、サーバーは[URIテンプレート](https://datatracker.ietf.org/doc/html/rfc6570)を公開でき、クライアントはこれを使用して有効なリソースURIを構築できます：
 
-The server responds with a list of resource contents:
+```typescript
+{
+  uriTemplate: string;   // RFC 6570に従ったURIテンプレート
+  name: string;          // このタイプの人間が読める名前
+  description?: string;  // オプションの説明
+  mimeType?: string;     // すべての一致するリソースに対するオプションのMIMEタイプ
+}
+```
+
+## リソースの読み取り
+
+リソースを読み取るために、クライアントはリソースURIを含む`resources/read`リクエストを行います。
+
+サーバーはリソースコンテンツのリストで応答します：
 
 ```typescript
 {
   contents: [
     {
-      uri: string;        // The URI of the resource
-      mimeType?: string;  // Optional MIME type
+      uri: string;        // リソースのURI
+      mimeType?: string;  // オプションのMIMEタイプ
 
-      // One of:
-      text?: string;      // For text resources
-      blob?: string;      // For binary resources (base64 encoded)
+      // 次のいずれか：
+      text?: string;      // テキストリソースの場合
+      blob?: string;      // バイナリリソースの場合（base64エンコード）
     }
   ]
 }
 ```
 
 <Tip>
-  Servers may return multiple resources in response to one `resources/read` request. This could be used, for example, to return a list of files inside a directory when the directory is read.
+  サーバーは1つの`resources/read`リクエストに対して複数のリソースを返す場合があります。これは、例えばディレクトリが読み取られたときにディレクトリ内のファイルのリストを返すために使用できます。
 </Tip>
 
-## Resource updates
+## リソースの更新
 
-MCP supports real-time updates for resources through two mechanisms:
+MCPは2つのメカニズムを通じてリソースのリアルタイム更新をサポートします：
 
-### List changes
+### リストの変更
 
-Servers can notify clients when their list of available resources changes via the `notifications/resources/list_changed` notification.
+サーバーは`notifications/resources/list_changed`通知を介して、利用可能なリソースのリストが変更されたことをクライアントに通知できます。
 
-### Content changes
+### コンテンツの変更
 
-Clients can subscribe to updates for specific resources:
+クライアントは特定のリソースの更新を購読できます：
 
-1. Client sends `resources/subscribe` with resource URI
-2. Server sends `notifications/resources/updated` when the resource changes
-3. Client can fetch latest content with `resources/read`
-4. Client can unsubscribe with `resources/unsubscribe`
+1. クライアントがリソースURIを含む`resources/subscribe`を送信
+2. リソースが変更されるとサーバーが`notifications/resources/updated`を送信
+3. クライアントは`resources/read`で最新のコンテンツを取得
+4. クライアントは`resources/unsubscribe`で購読を解除
 
-## Example implementation
+## 実装例
 
-Here's a simple example of implementing resource support in an MCP server:
+MCPサーバーでリソースサポートを実装する簡単な例：
 
 <Tabs>
   <Tab title="TypeScript">
@@ -154,20 +154,20 @@ Here's a simple example of implementing resource support in an MCP server:
       }
     });
 
-    // List available resources
+    // 利用可能なリソースをリスト
     server.setRequestHandler(ListResourcesRequestSchema, async () => {
       return {
         resources: [
           {
             uri: "file:///logs/app.log",
-            name: "Application Logs",
+            name: "アプリケーションログ",
             mimeType: "text/plain"
           }
         ]
       };
     });
 
-    // Read resource contents
+    // リソースコンテンツを読み取り
     server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
       const uri = request.params.uri;
 
@@ -184,7 +184,7 @@ Here's a simple example of implementing resource support in an MCP server:
         };
       }
 
-      throw new Error("Resource not found");
+      throw new Error("リソースが見つかりません");
     });
     ```
   </Tab>
@@ -197,7 +197,7 @@ Here's a simple example of implementing resource support in an MCP server:
         return [
             types.Resource(
                 uri="file:///logs/app.log",
-                name="Application Logs",
+                name="アプリケーションログ",
                 mimeType="text/plain"
             )
         ]
@@ -208,9 +208,9 @@ Here's a simple example of implementing resource support in an MCP server:
             log_contents = await read_log_file()
             return log_contents
 
-        raise ValueError("Resource not found")
+        raise ValueError("リソースが見つかりません")
 
-    # Start server
+    # サーバーを開始
     async with stdio_server() as streams:
         await app.run(
             streams[0],
@@ -221,32 +221,32 @@ Here's a simple example of implementing resource support in an MCP server:
   </Tab>
 </Tabs>
 
-## Best practices
+## ベストプラクティス
 
-When implementing resource support:
+リソースサポートを実装する際のベストプラクティス：
 
-1. Use clear, descriptive resource names and URIs
-2. Include helpful descriptions to guide LLM understanding
-3. Set appropriate MIME types when known
-4. Implement resource templates for dynamic content
-5. Use subscriptions for frequently changing resources
-6. Handle errors gracefully with clear error messages
-7. Consider pagination for large resource lists
-8. Cache resource contents when appropriate
-9. Validate URIs before processing
-10. Document your custom URI schemes
+1. 明確で説明的なリソース名とURIを使用
+2. LLMの理解を助けるために役立つ説明を含める
+3. 既知の場合は適切なMIMEタイプを設定
+4. 動的コンテンツにはリソーステンプレートを使用
+5. 頻繁に変更されるリソースには購読を使用
+6. 明確なエラーメッセージでエラーを適切に処理
+7. 大きなリソースリストにはページネーションを検討
+8. 適切な場合にリソースコンテンツをキャッシュ
+9. 処理前にURIを検証
+10. カスタムURIスキームを文書化
 
-## Security considerations
+## セキュリティ考慮事項
 
-When exposing resources:
+リソースを公開する際のセキュリティ考慮事項：
 
-- Validate all resource URIs
-- Implement appropriate access controls
-- Sanitize file paths to prevent directory traversal
-- Be cautious with binary data handling
-- Consider rate limiting for resource reads
-- Audit resource access
-- Encrypt sensitive data in transit
-- Validate MIME types
-- Implement timeouts for long-running reads
-- Handle resource cleanup appropriately
+- すべてのリソースURIを検証
+- 適切なアクセス制御を実装
+- ディレクトリトラバーサルを防ぐためにファイルパスをサニタイズ
+- バイナリデータの取り扱いに注意
+- リソース読み取りにレート制限を検討
+- リソースアクセスを監査
+- 機密データを転送中に暗号化
+- MIMEタイプを検証
+- 長時間実行される読み取りにタイムアウトを実装
+- リソースのクリーンアップを適切に処理

@@ -1,17 +1,17 @@
 ---
-title: "Core architecture"
-description: "Understand how MCP connects clients, servers, and LLMs"
+title: "コアアーキテクチャ"
+description: "MCPがクライアント、サーバー、LLMをどのように接続するかを理解する"
 ---
 
-The Model Context Protocol (MCP) is built on a flexible, extensible architecture that enables seamless communication between LLM applications and integrations. This document covers the core architectural components and concepts.
+Model Context Protocol (MCP)は、LLMアプリケーションと統合間のシームレスな通信を可能にする柔軟で拡張可能なアーキテクチャを基盤としています。このドキュメントでは、コアとなるアーキテクチャコンポーネントと概念について説明します。
 
-## Overview
+## 概要
 
-MCP follows a client-server architecture where:
+MCPはクライアント-サーバーアーキテクチャに従っており：
 
-- **Hosts** are LLM applications (like Claude Desktop or IDEs) that initiate connections
-- **Clients** maintain 1:1 connections with servers, inside the host application
-- **Servers** provide context, tools, and prompts to clients
+- **ホスト**は接続を開始するLLMアプリケーション（Claude DesktopやIDEなど）
+- **クライアント**はホストアプリケーション内でサーバーと1:1の接続を維持
+- **サーバー**はクライアントにコンテキスト、ツール、プロンプトを提供
 
 ```mermaid
 flowchart LR
@@ -30,11 +30,11 @@ flowchart LR
     client2 <-->|Transport Layer| server2
 ```
 
-## Core components
+## コアコンポーネント
 
-### Protocol layer
+### プロトコル層
 
-The protocol layer handles message framing, request/response linking, and high-level communication patterns.
+プロトコル層は、メッセージのフレーミング、リクエスト/レスポンスのリンク、高レベルの通信パターンを処理します。
 
 <Tabs>
   <Tab title="TypeScript">
@@ -91,31 +91,31 @@ The protocol layer handles message framing, request/response linking, and high-l
   </Tab>
 </Tabs>
 
-Key classes include:
+主要なクラス：
 
 * `Protocol`
 * `Client`
 * `Server`
 
-### Transport layer
+### トランスポート層
 
-The transport layer handles the actual communication between clients and servers. MCP supports multiple transport mechanisms:
+トランスポート層は、クライアントとサーバー間の実際の通信を処理します。MCPは複数のトランスポートメカニズムをサポートしています：
 
-1. **Stdio transport**
-   - Uses standard input/output for communication
-   - Ideal for local processes
+1. **Stdioトランスポート**
+   - 通信に標準入出力を使用
+   - ローカルプロセスに最適
 
-2. **HTTP with SSE transport**
-   - Uses Server-Sent Events for server-to-client messages
-   - HTTP POST for client-to-server messages
+2. **HTTP with SSEトランスポート**
+   - サーバーからクライアントへのメッセージにServer-Sent Eventsを使用
+   - クライアントからサーバーへのメッセージにHTTP POSTを使用
 
-All transports use [JSON-RPC](https://www.jsonrpc.org/) 2.0 to exchange messages. See the [specification](https://spec.modelcontextprotocol.io) for detailed information about the Model Context Protocol message format.
+すべてのトランスポートは[JSON-RPC](https://www.jsonrpc.org/) 2.0を使用してメッセージを交換します。詳細なメッセージフォーマットについては[仕様](https://spec.modelcontextprotocol.io)を参照してください。
 
-### Message types
+### メッセージタイプ
 
-MCP has these main types of messages:
+MCPには以下の主要なメッセージタイプがあります：
 
-1. **Requests** expect a response from the other side:
+1. **リクエスト**は相手からのレスポンスを期待します：
     ```typescript
     interface Request {
       method: string;
@@ -123,14 +123,14 @@ MCP has these main types of messages:
     }
     ```
 
-2. **Results** are successful responses to requests:
+2. **結果**はリクエストに対する成功レスポンスです：
     ```typescript
     interface Result {
       [key: string]: unknown;
     }
     ```
 
-3. **Errors** indicate that a request failed:
+3. **エラー**はリクエストが失敗したことを示します：
     ```typescript
     interface Error {
       code: number;
@@ -139,7 +139,7 @@ MCP has these main types of messages:
     }
     ```
 
-4. **Notifications** are one-way messages that don't expect a response:
+4. **通知**はレスポンスを期待しない一方向メッセージです：
     ```typescript
     interface Notification {
       method: string;
@@ -147,9 +147,9 @@ MCP has these main types of messages:
     }
     ```
 
-## Connection lifecycle
+## 接続ライフサイクル
 
-### 1. Initialization
+### 1. 初期化
 
 ```mermaid
 sequenceDiagram
@@ -163,28 +163,28 @@ sequenceDiagram
     Note over Client,Server: Connection ready for use
 ```
 
-1. Client sends `initialize` request with protocol version and capabilities
-2. Server responds with its protocol version and capabilities
-3. Client sends `initialized` notification as acknowledgment
-4. Normal message exchange begins
+1. クライアントがプロトコルバージョンと機能を含む`initialize`リクエストを送信
+2. サーバーが自身のプロトコルバージョンと機能で応答
+3. クライアントが確認として`initialized`通知を送信
+4. 通常のメッセージ交換が開始
 
-### 2. Message exchange
+### 2. メッセージ交換
 
-After initialization, the following patterns are supported:
+初期化後、以下のパターンがサポートされます：
 
-- **Request-Response**: Client or server sends requests, the other responds
-- **Notifications**: Either party sends one-way messages
+- **リクエスト-レスポンス**：クライアントまたはサーバーがリクエストを送信、相手が応答
+- **通知**：どちらかが一方向メッセージを送信
 
-### 3. Termination
+### 3. 終了
 
-Either party can terminate the connection:
-- Clean shutdown via `close()`
-- Transport disconnection
-- Error conditions
+どちらかの当事者が接続を終了できます：
+- `close()`によるクリーンシャットダウン
+- トランスポートの切断
+- エラー状態
 
-## Error handling
+## エラーハンドリング
 
-MCP defines these standard error codes:
+MCPは以下の標準エラーコードを定義しています：
 
 ```typescript
 enum ErrorCode {
@@ -197,16 +197,16 @@ enum ErrorCode {
 }
 ```
 
-SDKs and applications can define their own error codes above -32000.
+SDKとアプリケーションは-32000以上の独自のエラーコードを定義できます。
 
-Errors are propagated through:
-- Error responses to requests
-- Error events on transports
-- Protocol-level error handlers
+エラーは以下を通じて伝播します：
+- リクエストに対するエラーレスポンス
+- トランスポートのエラーイベント
+- プロトコルレベルのエラーハンドラ
 
-## Implementation example
+## 実装例
 
-Here's a basic example of implementing an MCP server:
+基本的なMCPサーバーの実装例：
 
 <Tabs>
   <Tab title="TypeScript">
@@ -272,78 +272,78 @@ Here's a basic example of implementing an MCP server:
   </Tab>
 </Tabs>
 
-## Best practices
+## ベストプラクティス
 
-### Transport selection
+### トランスポート選択
 
-1. **Local communication**
-   - Use stdio transport for local processes
-   - Efficient for same-machine communication
-   - Simple process management
+1. **ローカル通信**
+   - ローカルプロセスにはstdioトランスポートを使用
+   - 同一マシン通信に効率的
+   - シンプルなプロセス管理
 
-2. **Remote communication**
-   - Use SSE for scenarios requiring HTTP compatibility
-   - Consider security implications including authentication and authorization
+2. **リモート通信**
+   - HTTP互換性が必要なシナリオではSSEを使用
+   - 認証と認可を含むセキュリティ影響を考慮
 
-### Message handling
+### メッセージハンドリング
 
-1. **Request processing**
-   - Validate inputs thoroughly
-   - Use type-safe schemas
-   - Handle errors gracefully
-   - Implement timeouts
+1. **リクエスト処理**
+   - 入力を徹底的に検証
+   - タイプセーフなスキーマを使用
+   - エラーを適切に処理
+   - タイムアウトを実装
 
-2. **Progress reporting**
-   - Use progress tokens for long operations
-   - Report progress incrementally
-   - Include total progress when known
+2. **進捗報告**
+   - 長時間操作には進捗トークンを使用
+   - 増分的に進捗を報告
+   - 総進捗が分かっている場合は含める
 
-3. **Error management**
-   - Use appropriate error codes
-   - Include helpful error messages
-   - Clean up resources on errors
+3. **エラー管理**
+   - 適切なエラーコードを使用
+   - 役立つエラーメッセージを含める
+   - エラー時にリソースをクリーンアップ
 
-## Security considerations
+## セキュリティ考慮事項
 
-1. **Transport security**
-   - Use TLS for remote connections
-   - Validate connection origins
-   - Implement authentication when needed
+1. **トランスポートセキュリティ**
+   - リモート接続にはTLSを使用
+   - 接続元を検証
+   - 必要に応じて認証を実装
 
-2. **Message validation**
-   - Validate all incoming messages
-   - Sanitize inputs
-   - Check message size limits
-   - Verify JSON-RPC format
+2. **メッセージ検証**
+   - 受信メッセージをすべて検証
+   - 入力をサニタイズ
+   - メッセージサイズ制限をチェック
+   - JSON-RPCフォーマットを検証
 
-3. **Resource protection**
-   - Implement access controls
-   - Validate resource paths
-   - Monitor resource usage
-   - Rate limit requests
+3. **リソース保護**
+   - アクセス制御を実装
+   - リソースパスを検証
+   - リソース使用を監視
+   - リクエストをレート制限
 
-4. **Error handling**
-   - Don't leak sensitive information
-   - Log security-relevant errors
-   - Implement proper cleanup
-   - Handle DoS scenarios
+4. **エラーハンドリング**
+   - 機密情報を漏らさない
+   - セキュリティ関連のエラーをログ
+   - 適切なクリーンアップを実装
+   - DoSシナリオを処理
 
-## Debugging and monitoring
+## デバッグとモニタリング
 
-1. **Logging**
-   - Log protocol events
-   - Track message flow
-   - Monitor performance
-   - Record errors
+1. **ロギング**
+   - プロトコルイベントをログ
+   - メッセージフローを追跡
+   - パフォーマンスを監視
+   - エラーを記録
 
-2. **Diagnostics**
-   - Implement health checks
-   - Monitor connection state
-   - Track resource usage
-   - Profile performance
+2. **診断**
+   - ヘルスチェックを実装
+   - 接続状態を監視
+   - リソース使用を追跡
+   - パフォーマンスをプロファイリング
 
-3. **Testing**
-   - Test different transports
-   - Verify error handling
-   - Check edge cases
-   - Load test servers
+3. **テスト**
+   - 異なるトランスポートをテスト
+   - エラーハンドリングを検証
+   - エッジケースをチェック
+   - サーバーを負荷テスト

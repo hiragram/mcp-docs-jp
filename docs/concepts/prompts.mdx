@@ -1,61 +1,61 @@
 ---
-title: "Prompts"
-description: "Create reusable prompt templates and workflows"
+title: "プロンプト"
+description: "再利用可能なプロンプトテンプレートとワークフローの作成"
 ---
 
-Prompts enable servers to define reusable prompt templates and workflows that clients can easily surface to users and LLMs. They provide a powerful way to standardize and share common LLM interactions.
+プロンプトを使用すると、サーバーは再利用可能なプロンプトテンプレートとワークフローを定義でき、クライアントはそれらをユーザーやLLMに簡単に表示できます。これにより、一般的なLLMインタラクションを標準化して共有する強力な方法を提供します。
 
 <Note>
-  Prompts are designed to be **user-controlled**, meaning they are exposed from servers to clients with the intention of the user being able to explicitly select them for use.
+  プロンプトは**ユーザー制御**を目的として設計されており、サーバーからクライアントに公開され、ユーザーが明示的に選択して使用できるようになっています。
 </Note>
 
-## Overview
+## 概要
 
-Prompts in MCP are predefined templates that can:
-- Accept dynamic arguments
-- Include context from resources
-- Chain multiple interactions
-- Guide specific workflows
-- Surface as UI elements (like slash commands)
+MCPのプロンプトは、以下のことができる事前定義されたテンプレートです：
+- 動的な引数を受け入れる
+- リソースからのコンテキストを含める
+- 複数のインタラクションを連鎖させる
+- 特定のワークフローをガイドする
+- UI要素（スラッシュコマンドなど）として表示する
 
-## Prompt structure
+## プロンプト構造
 
-Each prompt is defined with:
+各プロンプトは以下の要素で定義されます：
 
 ```typescript
 {
-  name: string;              // Unique identifier for the prompt
-  description?: string;      // Human-readable description
-  arguments?: [              // Optional list of arguments
+  name: string;              // プロンプトの一意な識別子
+  description?: string;      // 人間が読める説明
+  arguments?: [              // オプションの引数リスト
     {
-      name: string;          // Argument identifier
-      description?: string;  // Argument description
-      required?: boolean;    // Whether argument is required
+      name: string;          // 引数の識別子
+      description?: string;  // 引数の説明
+      required?: boolean;    // 引数が必須かどうか
     }
   ]
 }
 ```
 
-## Discovering prompts
+## プロンプトの発見
 
-Clients can discover available prompts through the `prompts/list` endpoint:
+クライアントは`prompts/list`エンドポイントを通じて利用可能なプロンプトを発見できます：
 
 ```typescript
-// Request
+// リクエスト
 {
   method: "prompts/list"
 }
 
-// Response
+// レスポンス
 {
   prompts: [
     {
       name: "analyze-code",
-      description: "Analyze code for potential improvements",
+      description: "コードの改善点を分析",
       arguments: [
         {
           name: "language",
-          description: "Programming language",
+          description: "プログラミング言語",
           required: true
         }
       ]
@@ -64,12 +64,12 @@ Clients can discover available prompts through the `prompts/list` endpoint:
 }
 ```
 
-## Using prompts
+## プロンプトの使用
 
-To use a prompt, clients make a `prompts/get` request:
+プロンプトを使用するには、クライアントは`prompts/get`リクエストを行います：
 
 ```typescript
-// Request
+// リクエスト
 {
   method: "prompts/get",
   params: {
@@ -80,47 +80,47 @@ To use a prompt, clients make a `prompts/get` request:
   }
 }
 
-// Response
+// レスポンス
 {
-  description: "Analyze Python code for potential improvements",
+  description: "Pythonコードの改善点を分析",
   messages: [
     {
       role: "user",
       content: {
         type: "text",
-        text: "Please analyze the following Python code for potential improvements:\n\n```python\ndef calculate_sum(numbers):\n    total = 0\n    for num in numbers:\n        total = total + num\n    return total\n\nresult = calculate_sum([1, 2, 3, 4, 5])\nprint(result)\n```"
+        text: "以下のPythonコードの改善点を分析してください：\n\n```python\ndef calculate_sum(numbers):\n    total = 0\n    for num in numbers:\n        total = total + num\n    return total\n\nresult = calculate_sum([1, 2, 3, 4, 5])\nprint(result)\n```"
       }
     }
   ]
 }
 ```
 
-## Dynamic prompts
+## 動的プロンプト
 
-Prompts can be dynamic and include:
+プロンプトは動的であり、以下を含むことができます：
 
-### Embedded resource context
+### 埋め込みリソースコンテキスト
 
 ```json
 {
   "name": "analyze-project",
-  "description": "Analyze project logs and code",
+  "description": "プロジェクトログとコードを分析",
   "arguments": [
     {
       "name": "timeframe",
-      "description": "Time period to analyze logs",
+      "description": "ログを分析する時間枠",
       "required": true
     },
     {
       "name": "fileUri",
-      "description": "URI of code file to review",
+      "description": "レビューするコードファイルのURI",
       "required": true
     }
   ]
 }
 ```
 
-When handling the `prompts/get` request:
+`prompts/get`リクエストを処理する際：
 
 ```json
 {
@@ -129,7 +129,7 @@ When handling the `prompts/get` request:
       "role": "user",
       "content": {
         "type": "text",
-        "text": "Analyze these system logs and the code file for any issues:"
+        "text": "これらのシステムログとコードファイルの問題を分析してください："
       }
     },
     {
@@ -158,7 +158,7 @@ When handling the `prompts/get` request:
 }
 ```
 
-### Multi-step workflows
+### マルチステップワークフロー
 
 ```typescript
 const debugWorkflow = {
@@ -169,21 +169,21 @@ const debugWorkflow = {
         role: "user",
         content: {
           type: "text",
-          text: `Here's an error I'm seeing: ${error}`
+          text: `以下のエラーが発生しています：${error}`
         }
       },
       {
         role: "assistant",
         content: {
           type: "text",
-          text: "I'll help analyze this error. What have you tried so far?"
+          text: "このエラーを分析します。これまでに何を試しましたか？"
         }
       },
       {
         role: "user",
         content: {
           type: "text",
-          text: "I've tried restarting the service, but the error persists."
+          text: "サービスを再起動しましたが、エラーが解消しません。"
         }
       }
     ];
@@ -191,9 +191,9 @@ const debugWorkflow = {
 };
 ```
 
-## Example implementation
+## 実装例
 
-Here's a complete example of implementing prompts in an MCP server:
+MCPサーバーでプロンプトを実装する完全な例：
 
 <Tabs>
   <Tab title="TypeScript">
@@ -207,27 +207,27 @@ Here's a complete example of implementing prompts in an MCP server:
     const PROMPTS = {
       "git-commit": {
         name: "git-commit",
-        description: "Generate a Git commit message",
+        description: "Gitコミットメッセージを生成",
         arguments: [
           {
             name: "changes",
-            description: "Git diff or description of changes",
+            description: "Git差分または変更内容の説明",
             required: true
           }
         ]
       },
       "explain-code": {
         name: "explain-code",
-        description: "Explain how code works",
+        description: "コードの動作を説明",
         arguments: [
           {
             name: "code",
-            description: "Code to explain",
+            description: "説明するコード",
             required: true
           },
           {
             name: "language",
-            description: "Programming language",
+            description: "プログラミング言語",
             required: false
           }
         ]
@@ -243,18 +243,18 @@ Here's a complete example of implementing prompts in an MCP server:
       }
     });
 
-    // List available prompts
+    // 利用可能なプロンプトをリスト
     server.setRequestHandler(ListPromptsRequestSchema, async () => {
       return {
         prompts: Object.values(PROMPTS)
       };
     });
 
-    // Get specific prompt
+    // 特定のプロンプトを取得
     server.setRequestHandler(GetPromptRequestSchema, async (request) => {
       const prompt = PROMPTS[request.params.name];
       if (!prompt) {
-        throw new Error(`Prompt not found: ${request.params.name}`);
+        throw new Error(`プロンプトが見つかりません：${request.params.name}`);
       }
 
       if (request.params.name === "git-commit") {
@@ -264,7 +264,7 @@ Here's a complete example of implementing prompts in an MCP server:
               role: "user",
               content: {
                 type: "text",
-                text: `Generate a concise but descriptive commit message for these changes:\n\n${request.params.arguments?.changes}`
+                text: `これらの変更に対する簡潔で説明的なコミットメッセージを生成してください：\n\n${request.params.arguments?.changes}`
               }
             }
           ]
@@ -272,21 +272,21 @@ Here's a complete example of implementing prompts in an MCP server:
       }
 
       if (request.params.name === "explain-code") {
-        const language = request.params.arguments?.language || "Unknown";
+        const language = request.params.arguments?.language || "不明";
         return {
           messages: [
             {
               role: "user",
               content: {
                 type: "text",
-                text: `Explain how this ${language} code works:\n\n${request.params.arguments?.code}`
+                text: `この${language}コードの動作を説明してください：\n\n${request.params.arguments?.code}`
               }
             }
           ]
         };
       }
 
-      throw new Error("Prompt implementation not found");
+      throw new Error("プロンプトの実装が見つかりません");
     });
     ```
   </Tab>
@@ -295,38 +295,38 @@ Here's a complete example of implementing prompts in an MCP server:
     from mcp.server import Server
     import mcp.types as types
 
-    # Define available prompts
+    # 利用可能なプロンプトを定義
     PROMPTS = {
         "git-commit": types.Prompt(
             name="git-commit",
-            description="Generate a Git commit message",
+            description="Gitコミットメッセージを生成",
             arguments=[
                 types.PromptArgument(
                     name="changes",
-                    description="Git diff or description of changes",
+                    description="Git差分または変更内容の説明",
                     required=True
                 )
             ],
         ),
         "explain-code": types.Prompt(
             name="explain-code",
-            description="Explain how code works",
+            description="コードの動作を説明",
             arguments=[
                 types.PromptArgument(
                     name="code",
-                    description="Code to explain",
+                    description="説明するコード",
                     required=True
                 ),
                 types.PromptArgument(
                     name="language",
-                    description="Programming language",
+                    description="プログラミング言語",
                     required=False
                 )
             ],
         )
     }
 
-    # Initialize server
+    # サーバーを初期化
     app = Server("example-prompts-server")
 
     @app.list_prompts()
@@ -338,7 +338,7 @@ Here's a complete example of implementing prompts in an MCP server:
         name: str, arguments: dict[str, str] | None = None
     ) -> types.GetPromptResult:
         if name not in PROMPTS:
-            raise ValueError(f"Prompt not found: {name}")
+            raise ValueError(f"プロンプトが見つかりません：{name}")
 
         if name == "git-commit":
             changes = arguments.get("changes") if arguments else ""
@@ -348,8 +348,7 @@ Here's a complete example of implementing prompts in an MCP server:
                         role="user",
                         content=types.TextContent(
                             type="text",
-                            text=f"Generate a concise but descriptive commit message "
-                            f"for these changes:\n\n{changes}"
+                            text=f"これらの変更に対する簡潔で説明的なコミットメッセージを生成してください：\n\n{changes}"
                         )
                     )
                 ]
@@ -357,69 +356,69 @@ Here's a complete example of implementing prompts in an MCP server:
 
         if name == "explain-code":
             code = arguments.get("code") if arguments else ""
-            language = arguments.get("language", "Unknown") if arguments else "Unknown"
+            language = arguments.get("language", "不明") if arguments else "不明"
             return types.GetPromptResult(
                 messages=[
                     types.PromptMessage(
                         role="user",
                         content=types.TextContent(
                             type="text",
-                            text=f"Explain how this {language} code works:\n\n{code}"
+                            text=f"この{language}コードの動作を説明してください：\n\n{code}"
                         )
                     )
                 ]
             )
 
-        raise ValueError("Prompt implementation not found")
+        raise ValueError("プロンプトの実装が見つかりません")
     ```
   </Tab>
 </Tabs>
 
-## Best practices
+## ベストプラクティス
 
-When implementing prompts:
+プロンプトを実装する際のベストプラクティス：
 
-1. Use clear, descriptive prompt names
-2. Provide detailed descriptions for prompts and arguments
-3. Validate all required arguments
-4. Handle missing arguments gracefully
-5. Consider versioning for prompt templates
-6. Cache dynamic content when appropriate
-7. Implement error handling
-8. Document expected argument formats
-9. Consider prompt composability
-10. Test prompts with various inputs
+1. 明確で説明的なプロンプト名を使用
+2. プロンプトと引数に詳細な説明を提供
+3. すべての必須引数を検証
+4. 不足している引数を適切に処理
+5. プロンプトテンプレートのバージョン管理を検討
+6. 適切な場合に動的コンテンツをキャッシュ
+7. エラーハンドリングを実装
+8. 期待される引数の形式を文書化
+9. プロンプトの構成可能性を考慮
+10. 様々な入力でプロンプトをテスト
 
-## UI integration
+## UI統合
 
-Prompts can be surfaced in client UIs as:
+プロンプトはクライアントUIで以下のように表示できます：
 
-- Slash commands
-- Quick actions
-- Context menu items
-- Command palette entries
-- Guided workflows
-- Interactive forms
+- スラッシュコマンド
+- クイックアクション
+- コンテキストメニュー項目
+- コマンドパレットエントリ
+- ガイド付きワークフロー
+- インタラクティブフォーム
 
-## Updates and changes
+## 更新と変更
 
-Servers can notify clients about prompt changes:
+サーバーはプロンプトの変更についてクライアントに通知できます：
 
-1. Server capability: `prompts.listChanged`
-2. Notification: `notifications/prompts/list_changed`
-3. Client re-fetches prompt list
+1. サーバー機能：`prompts.listChanged`
+2. 通知：`notifications/prompts/list_changed`
+3. クライアントがプロンプトリストを再取得
 
-## Security considerations
+## セキュリティ考慮事項
 
-When implementing prompts:
+プロンプトを実装する際のセキュリティ考慮事項：
 
-- Validate all arguments
-- Sanitize user input
-- Consider rate limiting
-- Implement access controls
-- Audit prompt usage
-- Handle sensitive data appropriately
-- Validate generated content
-- Implement timeouts
-- Consider prompt injection risks
-- Document security requirements
+- すべての引数を検証
+- ユーザー入力をサニタイズ
+- レート制限を検討
+- アクセス制御を実装
+- プロンプト使用を監査
+- 機密データを適切に処理
+- 生成されたコンテンツを検証
+- タイムアウトを実装
+- プロンプトインジェクションのリスクを考慮
+- セキュリティ要件を文書化
