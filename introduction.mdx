@@ -1,119 +1,119 @@
 ---
-title: Introduction
-description: 'Get started with the Model Context Protocol (MCP)'
+title: "はじめに"
+description: "Model Context Protocol (MCP)を使ってみましょう"
 ---
 
-<Note>C# SDK released! Check out [what else is new.](/development/updates)</Note>
+<Note>C# SDKがリリースされました！[最新情報](/development/updates)をチェックしてください</Note>
 
-MCP is an open protocol that standardizes how applications provide context to LLMs. Think of MCP like a USB-C port for AI applications. Just as USB-C provides a standardized way to connect your devices to various peripherals and accessories, MCP provides a standardized way to connect AI models to different data sources and tools.
+MCPは、アプリケーションがLLMにコンテキストを提供する方法を標準化するオープンプロトコルです。MCPはAIアプリケーションのためのUSB-Cポートのようなものと考えてください。USB-Cがデバイスを様々な周辺機器やアクセサリに接続する標準化された方法を提供するように、MCPはAIモデルを異なるデータソースやツールに接続する標準化された方法を提供します。
 
-## Why MCP?
+## MCPの利点
 
-MCP helps you build agents and complex workflows on top of LLMs. LLMs frequently need to integrate with data and tools, and MCP provides:
-- A growing list of pre-built integrations that your LLM can directly plug into
-- The flexibility to switch between LLM providers and vendors
-- Best practices for securing your data within your infrastructure
+MCPはLLM上にエージェントや複雑なワークフローを構築するのに役立ちます。LLMは頻繁にデータやツールとの統合を必要とし、MCPは以下を提供します:
+- LLMが直接接続できる事前構築済みの統合の増え続けるリスト
+- LLMプロバイダーやベンダー間で切り替える柔軟性
+- インフラストラクチャ内でデータを保護するためのベストプラクティス
 
-### General architecture
+### 一般的なアーキテクチャ
 
-At its core, MCP follows a client-server architecture where a host application can connect to multiple servers:
+コアとなるのは、MCPがホストアプリケーションが複数のサーバーに接続できるクライアント-サーバーアーキテクチャに従っていることです:
 
 ```mermaid
 flowchart LR
-    subgraph "Your Computer"
-        Host["Host with MCP Client\n(Claude, IDEs, Tools)"]
-        S1["MCP Server A"]
-        S2["MCP Server B"]
-        S3["MCP Server C"]
-        Host <-->|"MCP Protocol"| S1
-        Host <-->|"MCP Protocol"| S2
-        Host <-->|"MCP Protocol"| S3
-        S1 <--> D1[("Local\nData Source A")]
-        S2 <--> D2[("Local\nData Source B")]
+    subgraph "あなたのコンピュータ"
+        Host["MCPクライアントを持つホスト\n(Claude、IDEs、ツール)"]
+        S1["MCPサーバーA"]
+        S2["MCPサーバーB"]
+        S3["MCPサーバーC"]
+        Host <-->|"MCPプロトコル"| S1
+        Host <-->|"MCPプロトコル"| S2
+        Host <-->|"MCPプロトコル"| S3
+        S1 <--> D1[("ローカル\nデータソースA")]
+        S2 <--> D2[("ローカル\nデータソースB")]
     end
-    subgraph "Internet"
-        S3 <-->|"Web APIs"| D3[("Remote\nService C")]
+    subgraph "インターネット"
+        S3 <-->|"Web API"| D3[("リモート\nサービスC")]
     end
 ```
 
-- **MCP Hosts**: Programs like Claude Desktop, IDEs, or AI tools that want to access data through MCP
-- **MCP Clients**: Protocol clients that maintain 1:1 connections with servers
-- **MCP Servers**: Lightweight programs that each expose specific capabilities through the standardized Model Context Protocol
-- **Local Data Sources**: Your computer's files, databases, and services that MCP servers can securely access
-- **Remote Services**: External systems available over the internet (e.g., through APIs) that MCP servers can connect to
+- **MCPホスト**: Claude Desktop、IDE、またはMCPを通じてデータにアクセスしたいAIツールなどのプログラム
+- **MCPクライアント**: サーバーと1:1の接続を維持するプロトコルクライアント
+- **MCPサーバー**: 標準化されたModel Context Protocolを通じて特定の機能を公開する軽量プログラム
+- **ローカルデータソース**: MCPサーバーが安全にアクセスできるコンピュータのファイル、データベース、サービス
+- **リモートサービス**: MCPサーバーが接続できるインターネット経由の外部システム（例: API経由）
 
-## Get started
+## はじめましょう
 
-Choose the path that best fits your needs:
+あなたのニーズに最適なパスを選択してください:
 
-#### Quick Starts
+#### クイックスタート
 <CardGroup cols={2}>
   <Card
-    title="For Server Developers"
+    title="サーバー開発者向け"
     icon="bolt"
     href="/quickstart/server"
   >
-    Get started building your own server to use in Claude for Desktop and other clients
+    Claude for Desktopや他のクライアントで使用する独自のサーバー構築を開始
   </Card>
   <Card
-    title="For Client Developers"
+    title="クライアント開発者向け"
     icon="bolt"
     href="/quickstart/client"
   >
-    Get started building your own client that can integrate with all MCP servers
+    すべてのMCPサーバーと統合できる独自のクライアント構築を開始
   </Card>
   <Card
-    title="For Claude Desktop Users"
+    title="Claude Desktopユーザー向け"
     icon="bolt"
     href="/quickstart/user"
   >
-    Get started using pre-built servers in Claude for Desktop
+    Claude for Desktopで事前構築済みサーバーの使用を開始
   </Card>
 </CardGroup>
 
-#### Examples
+#### 例
 <CardGroup cols={2}>
   <Card
-    title="Example Servers"
+    title="サーバー例"
     icon="grid"
     href="/examples"
   >
-    Check out our gallery of official MCP servers and implementations
+    公式MCPサーバーと実装のギャラリーをチェック
   </Card>
   <Card
-    title="Example Clients"
+    title="クライアント例"
     icon="cubes"
     href="/clients"
   >
-    View the list of clients that support MCP integrations
+    MCP統合をサポートするクライアントのリストを表示
   </Card>
 </CardGroup>
 
-## Tutorials
+## チュートリアル
 
 <CardGroup cols={2}>
   <Card
-    title="Building MCP with LLMs"
+    title="LLMを使ったMCP構築"
     icon="comments"
     href="/tutorials/building-mcp-with-llms"
   >
-    Learn how to use LLMs like Claude to speed up your MCP development
+    ClaudeのようなLLMを使用してMCP開発を加速する方法を学ぶ
   </Card>
   <Card
-  title="Debugging Guide"
+  title="デバッグガイド"
   icon="bug"
   href="/docs/tools/debugging">
-    Learn how to effectively debug MCP servers and integrations
+    MCPサーバーと統合を効果的にデバッグする方法を学ぶ
   </Card>
   <Card
-    title="MCP Inspector"
+    title="MCPインスペクター"
     icon="magnifying-glass"
     href="/docs/tools/inspector"
   >
-    Test and inspect your MCP servers with our interactive debugging tool
+    インタラクティブなデバッグツールでMCPサーバーをテスト・検査
   </Card>
   <Card
-    title="MCP Workshop (Video, 2hr)"
+    title="MCPワークショップ（動画、2時間）"
     icon="person-chalkboard"
     href="https://www.youtube.com/watch?v=kQmXtrmQ5Zg"
   >
@@ -121,64 +121,64 @@ Choose the path that best fits your needs:
   </Card>
 </CardGroup>
 
-## Explore MCP
+## MCPを探る
 
-Dive deeper into MCP's core concepts and capabilities:
+MCPのコアコンセプトと機能についてさらに深く掘り下げましょう:
 
 <CardGroup cols={2}>
   <Card
-    title="Core architecture"
+    title="コアアーキテクチャ"
     icon="sitemap"
     href="/docs/concepts/architecture"
   >
-    Understand how MCP connects clients, servers, and LLMs
+    クライアント、サーバー、LLMをMCPがどのように接続するかを理解
   </Card>
   <Card
-    title="Resources"
+    title="リソース"
     icon="database"
     href="/docs/concepts/resources"
   >
-    Expose data and content from your servers to LLMs
+    サーバーからLLMにデータとコンテンツを公開
   </Card>
   <Card
-    title="Prompts"
+    title="プロンプト"
     icon="message"
     href="/docs/concepts/prompts"
   >
-    Create reusable prompt templates and workflows
+    再利用可能なプロンプトテンプレートとワークフローを作成
   </Card>
   <Card
-    title="Tools"
+    title="ツール"
     icon="wrench"
     href="/docs/concepts/tools"
   >
-    Enable LLMs to perform actions through your server
+    LLMがサーバーを通じてアクションを実行できるようにする
   </Card>
   <Card
-    title="Sampling"
+    title="サンプリング"
     icon="robot"
     href="/docs/concepts/sampling"
   >
-    Let your servers request completions from LLMs
+    サーバーがLLMから補完をリクエストできるようにする
   </Card>
   <Card
-    title="Transports"
+    title="トランスポート"
     icon="network-wired"
     href="/docs/concepts/transports"
   >
-    Learn about MCP's communication mechanism
+    MCPの通信メカニズムについて学ぶ
   </Card>
 </CardGroup>
 
-## Contributing
+## 貢献
 
-Want to contribute? Check out our [Contributing Guide](/development/contributing) to learn how you can help improve MCP.
+貢献したいですか？[貢献ガイド](/development/contributing)をチェックして、MCPの改善にどのように役立てられるかを学んでください。
 
-## Support and Feedback
+## サポートとフィードバック
 
-Here's how to get help or provide feedback:
+以下はヘルプを求めたりフィードバックを提供する方法です:
 
-- For bug reports and feature requests related to the MCP specification, SDKs, or documentation (open source), please [create a GitHub issue](https://github.com/modelcontextprotocol)
-- For discussions or Q&A about the MCP specification, use the [specification discussions](https://github.com/modelcontextprotocol/specification/discussions)
-- For discussions or Q&A about other MCP open source components, use the [organization discussions](https://github.com/orgs/modelcontextprotocol/discussions)
-- For bug reports, feature requests, and questions related to Claude.app and claude.ai's MCP integration, please see Anthropic's guide on [How to Get Support](https://support.anthropic.com/en/articles/9015913-how-to-get-support)
+- MCP仕様、SDK、またはドキュメント（オープンソース）に関連するバグレポートや機能リクエストについては、[GitHubイシューを作成](https://github.com/modelcontextprotocol)してください
+- MCP仕様に関するディスカッションやQ&Aについては、[仕様ディスカッション](https://github.com/modelcontextprotocol/specification/discussions)を使用してください
+- 他のMCPオープンソースコンポーネントに関するディスカッションやQ&Aについては、[組織ディスカッション](https://github.com/orgs/modelcontextprotocol/discussions)を使用してください
+- Claude.appとclaude.aiのMCP統合に関するバグレポート、機能リクエスト、質問については、Anthropicの[サポートの受け方](https://support.anthropic.com/en/articles/9015913-how-to-get-support)ガイドをご覧ください
