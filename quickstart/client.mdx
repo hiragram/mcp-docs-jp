@@ -1,79 +1,78 @@
 ---
-title: "For Client Developers"
-description: "Get started building your own client that can integrate with all MCP servers."
+title: "クライアント開発者向け"
+description: "すべてのMCPサーバーと統合可能な独自クライアントの構築を開始しましょう"
 ---
 
-In this tutorial, you'll learn how to build a LLM-powered chatbot client that connects to MCP servers. It helps to have gone through the [Server quickstart](/quickstart/server) that guides you through the basic of building your first server.
+[翻訳済み]
 
-<Tabs>
 <Tab title="Python">
 
-[You can find the complete code for this tutorial here.](https://github.com/modelcontextprotocol/quickstart-resources/tree/main/mcp-client-python)
+[このチュートリアルの完全なコードはこちらから確認できます](https://github.com/modelcontextprotocol/quickstart-resources/tree/main/mcp-client-python)
 
-## System Requirements
+## システム要件
 
-Before starting, ensure your system meets these requirements:
-- Mac or Windows computer
-- Latest Python version installed
-- Latest version of `uv` installed
+開始前に、以下のシステム要件を満たしていることを確認してください:
+- MacまたはWindowsコンピュータ
+- 最新バージョンのPythonがインストールされていること
+- 最新バージョンの`uv`がインストールされていること
 
-## Setting Up Your Environment
+## 環境設定
 
-First, create a new Python project with `uv`:
+まず、`uv`を使用して新しいPythonプロジェクトを作成します:
 
 ```bash
-# Create project directory
+# プロジェクトディレクトリを作成
 uv init mcp-client
 cd mcp-client
 
-# Create virtual environment
+# 仮想環境を作成
 uv venv
 
-# Activate virtual environment
-# On Windows:
+# 仮想環境をアクティベート
+# Windowsの場合:
 .venv\Scripts\activate
-# On Unix or MacOS:
+# UnixまたはMacOSの場合:
 source .venv/bin/activate
 
-# Install required packages
+# 必要なパッケージをインストール
 uv add mcp anthropic python-dotenv
 
-# Remove boilerplate files
+# ボイラープレートファイルを削除
 rm main.py
 
-# Create our main file
+# メインファイルを作成
 touch client.py
 ```
 
-## Setting Up Your API Key
+## APIキーの設定
 
-You'll need an Anthropic API key from the [Anthropic Console](https://console.anthropic.com/settings/keys).
+[Anthropic Console](https://console.anthropic.com/settings/keys)からAnthropic APIキーを取得する必要があります。
 
-Create a `.env` file to store it:
+.envファイルを作成してキーを保存します:
 
 ```bash
-# Create .env file
+# .envファイルを作成
 touch .env
 ```
 
-Add your key to the `.env` file:
+.envファイルにキーを追加:
 ```bash
 ANTHROPIC_API_KEY=<your key here>
 ```
 
-Add `.env` to your `.gitignore`:
+.gitignoreに.envを追加:
 ```bash
 echo ".env" >> .gitignore
 ```
 
 <Warning>
-Make sure you keep your `ANTHROPIC_API_KEY` secure!
+`ANTHROPIC_API_KEY`は安全に保管してください！
 </Warning>
 
-## Creating the Client
+## クライアントの作成
 
-### Basic Client Structure
-First, let's set up our imports and create the basic client class:
+### 基本的なクライアント構造
+まず、インポートと基本的なクライアントクラスを設定します:
 
 ```python
 import asyncio
@@ -86,32 +85,32 @@ from mcp.client.stdio import stdio_client
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
-load_dotenv()  # load environment variables from .env
+load_dotenv()  # .envから環境変数を読み込み
 
 class MCPClient:
     def __init__(self):
-        # Initialize session and client objects
+        # セッションとクライアントオブジェクトを初期化
         self.session: Optional[ClientSession] = None
         self.exit_stack = AsyncExitStack()
         self.anthropic = Anthropic()
-    # methods will go here
+    # メソッドはここに追加
 ```
 
-### Server Connection Management
+### サーバー接続管理
 
-Next, we'll implement the method to connect to an MCP server:
+次に、MCPサーバーに接続するメソッドを実装します:
 
 ```python
 async def connect_to_server(self, server_script_path: str):
-    """Connect to an MCP server
+    """MCPサーバーに接続します
 
     Args:
-        server_script_path: Path to the server script (.py or .js)
+        server_script_path: サーバースクリプトのパス (.py または .js)
     """
     is_python = server_script_path.endswith('.py')
     is_js = server_script_path.endswith('.js')
     if not (is_python or is_js):
-        raise ValueError("Server script must be a .py or .js file")
+        raise ValueError("サーバースクリプトは.pyまたは.jsファイルである必要があります")
 
     command = "python" if is_python else "node"
     server_params = StdioServerParameters(
@@ -126,19 +125,19 @@ async def connect_to_server(self, server_script_path: str):
 
     await self.session.initialize()
 
-    # List available tools
+    # 利用可能なツールをリストアップ
     response = await self.session.list_tools()
     tools = response.tools
-    print("\nConnected to server with tools:", [tool.name for tool in tools])
+    print("\nサーバーに接続しました。利用可能なツール:", [tool.name for tool in tools])
 ```
 
-### Query Processing Logic
+### クエリ処理ロジック
 
-Now let's add the core functionality for processing queries and handling tool calls:
+クエリを処理し、ツール呼び出しを処理するコア機能を追加します:
 
 ```python
 async def process_query(self, query: str) -> str:
-    """Process a query using Claude and available tools"""
+    """Claudeと利用可能なツールを使用してクエリを処理します"""
     messages = [
         {
             "role": "user",
@@ -153,7 +152,7 @@ async def process_query(self, query: str) -> str:
         "input_schema": tool.inputSchema
     } for tool in response.tools]
 
-    # Initial Claude API call
+    # Claude APIの初期呼び出し
     response = self.anthropic.messages.create(
         model="claude-3-5-sonnet-20241022",
         max_tokens=1000,
@@ -161,7 +160,7 @@ async def process_query(self, query: str) -> str:
         tools=available_tools
     )
 
-    # Process response and handle tool calls
+    # レスポンスを処理し、ツール呼び出しを処理
     final_text = []
 
     assistant_message_content = []
@@ -173,9 +172,9 @@ async def process_query(self, query: str) -> str:
             tool_name = content.name
             tool_args = content.input
 
-            # Execute tool call
+            # ツール呼び出しを実行
             result = await self.session.call_tool(tool_name, tool_args)
-            final_text.append(f"[Calling tool {tool_name} with args {tool_args}]")
+            final_text.append(f"[ツール {tool_name} を引数 {tool_args} で呼び出し中]")
 
             assistant_message_content.append(content)
             messages.append({
@@ -193,7 +192,7 @@ async def process_query(self, query: str) -> str:
                 ]
             })
 
-            # Get next response from Claude
+            # Claudeから次のレスポンスを取得
             response = self.anthropic.messages.create(
                 model="claude-3-5-sonnet-20241022",
                 max_tokens=1000,
@@ -206,18 +205,18 @@ async def process_query(self, query: str) -> str:
     return "\n".join(final_text)
 ```
 
-### Interactive Chat Interface
-Now we'll add the chat loop and cleanup functionality:
+### インタラクティブチャットインターフェース
+チャットループとクリーンアップ機能を追加します:
 
 ```python
 async def chat_loop(self):
-    """Run an interactive chat loop"""
-    print("\nMCP Client Started!")
-    print("Type your queries or 'quit' to exit.")
+    """インタラクティブなチャットループを実行します"""
+    print("\nMCPクライアントが起動しました！")
+    print("クエリを入力するか、'quit'で終了します。")
 
     while True:
         try:
-            query = input("\nQuery: ").strip()
+            query = input("\nクエリ: ").strip()
 
             if query.lower() == 'quit':
                 break
@@ -226,21 +225,21 @@ async def chat_loop(self):
             print("\n" + response)
 
         except Exception as e:
-            print(f"\nError: {str(e)}")
+            print(f"\nエラー: {str(e)}")
 
 async def cleanup(self):
-    """Clean up resources"""
+    """リソースをクリーンアップします"""
     await self.exit_stack.aclose()
 ```
 
-### Main Entry Point
+### メインエントリーポイント
 
-Finally, we'll add the main execution logic:
+最後に、メイン実行ロジックを追加します:
 
 ```python
 async def main():
     if len(sys.argv) < 2:
-        print("Usage: python client.py <path_to_server_script>")
+        print("使用方法: python client.py <サーバースクリプトのパス>")
         sys.exit(1)
 
     client = MCPClient()
@@ -255,763 +254,197 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-You can find the complete `client.py` file [here.](https://gist.github.com/zckly/f3f28ea731e096e53b39b47bf0a2d4b1)
+完全な`client.py`ファイルは[こちら](https://gist.github.com/zckly/f3f28ea731e096e53b39b47bf0a2d4b1)から確認できます。
 
-## Key Components Explained
+## 主要コンポーネントの説明
 
-### 1. Client Initialization
-- The `MCPClient` class initializes with session management and API clients
-- Uses `AsyncExitStack` for proper resource management
-- Configures the Anthropic client for Claude interactions
+### 1. クライアント初期化
+- `MCPClient`クラスはセッション管理とAPIクライアントで初期化されます
+- 適切なリソース管理のために`AsyncExitStack`を使用します
+- Claudeとの連携のためにAnthropicクライアントを設定します
 
-### 2. Server Connection
-- Supports both Python and Node.js servers
-- Validates server script type
-- Sets up proper communication channels
-- Initializes the session and lists available tools
+### 2. サーバー接続
+- PythonとNode.jsサーバーの両方をサポートします
+- サーバースクリプトの種類を検証します
+- 適切な通信チャネルを設定します
+- セッションを初期化し、利用可能なツールをリストアップします
 
-### 3. Query Processing
-- Maintains conversation context
-- Handles Claude's responses and tool calls
-- Manages the message flow between Claude and tools
-- Combines results into a coherent response
+### 3. クエリ処理
+- 会話のコンテキストを維持します
+- Claudeのレスポンスとツール呼び出しを処理します
+- Claudeとツール間のメッセージフローを管理します
+- 結果を一貫性のあるレスポンスに結合します
 
-### 4. Interactive Interface
-- Provides a simple command-line interface
-- Handles user input and displays responses
-- Includes basic error handling
-- Allows graceful exit
+### 4. インタラクティブインターフェース
+- シンプルなコマンドラインインターフェースを提供します
+- ユーザー入力とレスポンス表示を処理します
+- 基本的なエラーハンドリングを含みます
+- グレースフルな終了を可能にします
 
-### 5. Resource Management
-- Proper cleanup of resources
-- Error handling for connection issues
-- Graceful shutdown procedures
+### 5. リソース管理
+- リソースの適切なクリーンアップ
+- 接続問題のエラーハンドリング
+- グレースフルなシャットダウンプロシージャ
 
-## Common Customization Points
+## 一般的なカスタマイズポイント
 
-1. **Tool Handling**
-   - Modify `process_query()` to handle specific tool types
-   - Add custom error handling for tool calls
-   - Implement tool-specific response formatting
+1. **ツール処理**
+   - 特定のツールタイプを処理するために`process_query()`を変更します
+   - ツール呼び出しのカスタムエラーハンドリングを追加します
+   - ツール固有のレスポンスフォーマットを実装します
 
-2. **Response Processing**
-   - Customize how tool results are formatted
-   - Add response filtering or transformation
-   - Implement custom logging
+2. **レスポンス処理**
+   - ツール結果のフォーマット方法をカスタマイズします
+   - レスポンスフィルタリングや変換を追加します
+   - カスタムロギングを実装します
 
-3. **User Interface**
-   - Add a GUI or web interface
-   - Implement rich console output
-   - Add command history or auto-completion
+3. **ユーザーインターフェース**
+   - GUIやWebインターフェースを追加します
+   - リッチコンソール出力を実装します
+   - コマンド履歴やオートコンプリートを追加します
 
-## Running the Client
+## クライアントの実行
 
-To run your client with any MCP server:
+任意のMCPサーバーでクライアントを実行します:
 
 ```bash
-uv run client.py path/to/server.py # python server
-uv run client.py path/to/build/index.js # node server
+uv run client.py path/to/server.py # Pythonサーバー
+uv run client.py path/to/build/index.js # Nodeサーバー
 ```
 
 <Note>
-If you're continuing the weather tutorial from the server quickstart, your command might look something like this: `python client.py .../quickstart-resources/weather-server-python/weather.py`
+サーバークイックスタートの天気チュートリアルを続ける場合、コマンドは次のようになります: `python client.py .../quickstart-resources/weather-server-python/weather.py`
 </Note>
 
-The client will:
-1. Connect to the specified server
-2. List available tools
-3. Start an interactive chat session where you can:
-   - Enter queries
-   - See tool executions
-   - Get responses from Claude
+クライアントは以下のことを行います:
+1. 指定されたサーバーに接続します
+2. 利用可能なツールをリストアップします
+3. インタラクティブなチャットセッションを開始します:
+   - クエリを入力できます
+   - ツールの実行を確認できます
+   - Claudeからのレスポンスを取得できます
 
-Here's an example of what it should look like if connected to the weather server from the server quickstart:
+サーバークイックスタートの天気サーバーに接続した場合の例:
 
 <Frame>
   <img src="/images/client-claude-cli-python.png" />
 </Frame>
 
-## How It Works
+## 動作の仕組み
 
-When you submit a query:
+クエリを送信すると:
 
-1. The client gets the list of available tools from the server
-2. Your query is sent to Claude along with tool descriptions
-3. Claude decides which tools (if any) to use
-4. The client executes any requested tool calls through the server
-5. Results are sent back to Claude
-6. Claude provides a natural language response
-7. The response is displayed to you
+1. クライアントはサーバーから利用可能なツールのリストを取得します
+2. クエリがツールの説明と共にClaudeに送信されます
+3. Claudeは使用するツール(ある場合)を決定します
+4. クライアントはサーバーを通じて要求されたツール呼び出しを実行します
+5. 結果がClaudeに送り返されます
+6. Claudeは自然言語のレスポンスを提供します
+7. レスポンスが表示されます
 
-## Best practices
+## ベストプラクティス
 
-1. **Error Handling**
-   - Always wrap tool calls in try-catch blocks
-   - Provide meaningful error messages
-   - Gracefully handle connection issues
+1. **エラーハンドリング**
+   - ツール呼び出しは常にtry-catchブロックで囲みます
+   - 意味のあるエラーメッセージを提供します
+   - 接続問題を適切に処理します
 
-2. **Resource Management**
-   - Use `AsyncExitStack` for proper cleanup
-   - Close connections when done
-   - Handle server disconnections
+2. **リソース管理**
+   - 適切なクリーンアップのために`AsyncExitStack`を使用します
+   - 終了時に接続を閉じます
+   - サーバーの切断を処理します
 
-3. **Security**
-   - Store API keys securely in `.env`
-   - Validate server responses
-   - Be cautious with tool permissions
+3. **セキュリティ**
+   - APIキーは安全に.envに保管します
+   - サーバーのレスポンスを検証します
+   - ツールの権限には注意します
 
-## Troubleshooting
+## トラブルシューティング
 
-### Server Path Issues
-- Double-check the path to your server script is correct
-- Use the absolute path if the relative path isn't working
-- For Windows users, make sure to use forward slashes (/) or escaped backslashes (\\) in the path
-- Verify the server file has the correct extension (.py for Python or .js for Node.js)
+### サーバーパス問題
+- サーバースクリプトへのパスを再確認します
+- 相対パスが機能しない場合は絶対パスを使用します
+- Windowsユーザーはフォワードスラッシュ(/)またはエスケープされたバックスラッシュ(\\)を使用します
+- サーバーファイルの拡張子が正しいことを確認します(.py for Pythonまたは.js for Node.js)
 
-Example of correct path usage:
+正しいパス使用例:
 ```bash
-# Relative path
+# 相対パス
 uv run client.py ./server/weather.py
 
-# Absolute path
+# 絶対パス
 uv run client.py /Users/username/projects/mcp-server/weather.py
 
-# Windows path (either format works)
+# Windowsパス(どちらの形式でも動作)
 uv run client.py C:/projects/mcp-server/weather.py
 uv run client.py C:\\projects\\mcp-server\\weather.py
 ```
 
-### Response Timing
-- The first response might take up to 30 seconds to return
-- This is normal and happens while:
-  - The server initializes
-  - Claude processes the query
-  - Tools are being executed
-- Subsequent responses are typically faster
-- Don't interrupt the process during this initial waiting period
-
-### Common Error Messages
-
-If you see:
-- `FileNotFoundError`: Check your server path
-- `Connection refused`: Ensure the server is running and the path is correct
-- `Tool execution failed`: Verify the tool's required environment variables are set
-- `Timeout error`: Consider increasing the timeout in your client configuration
-
-</Tab>
-
-<Tab title="Node">
-
-[You can find the complete code for this tutorial here.](https://github.com/modelcontextprotocol/quickstart-resources/tree/main/mcp-client-typescript)
-## System Requirements
-
-Before starting, ensure your system meets these requirements:
-- Mac or Windows computer
-- Node.js 17 or higher installed
-- Latest version of `npm` installed
-- Anthropic API key (Claude)
-
-## Setting Up Your Environment
-
-First, let's create and set up our project:
-
-<CodeGroup>
-```bash MacOS/Linux
-# Create project directory
-mkdir mcp-client-typescript
-cd mcp-client-typescript
-
-# Initialize npm project
-npm init -y
-
-# Install dependencies
-npm install @anthropic-ai/sdk @modelcontextprotocol/sdk dotenv
-
-# Install dev dependencies
-npm install -D @types/node typescript
-
-# Create source file
-touch index.ts
-```
-
-```powershell Windows
-# Create project directory
-md mcp-client-typescript
-cd mcp-client-typescript
-
-# Initialize npm project
-npm init -y
-
-# Install dependencies
-npm install @anthropic-ai/sdk @modelcontextprotocol/sdk dotenv
-
-# Install dev dependencies
-npm install -D @types/node typescript
-
-# Create source file
-new-item index.ts
-```
-</CodeGroup>
-
-Update your `package.json` to set `type: "module"` and a build script:
-
-```json package.json
-{
-  "type": "module",
-  "scripts": {
-    "build": "tsc && chmod 755 build/index.js"
-  }
-}
-```
-
-Create a `tsconfig.json` in the root of your project:
-
-```json tsconfig.json
-{
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "Node16",
-    "moduleResolution": "Node16",
-    "outDir": "./build",
-    "rootDir": "./",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": ["index.ts"],
-  "exclude": ["node_modules"]
-}
-```
-
-## Setting Up Your API Key
-
-You'll need an Anthropic API key from the [Anthropic Console](https://console.anthropic.com/settings/keys).
-
-Create a `.env` file to store it:
-
-```bash
-echo "ANTHROPIC_API_KEY=<your key here>" > .env
-```
-
-Add `.env` to your `.gitignore`:
-```bash
-echo ".env" >> .gitignore
-```
-
-<Warning>
-Make sure you keep your `ANTHROPIC_API_KEY` secure!
-</Warning>
-
-## Creating the Client
-
-### Basic Client Structure
-
-First, let's set up our imports and create the basic client class in `index.ts`:
-
-```typescript
-import { Anthropic } from "@anthropic-ai/sdk";
-import {
-  MessageParam,
-  Tool,
-} from "@anthropic-ai/sdk/resources/messages/messages.mjs";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import readline from "readline/promises";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-if (!ANTHROPIC_API_KEY) {
-  throw new Error("ANTHROPIC_API_KEY is not set");
-}
-
-class MCPClient {
-  private mcp: Client;
-  private anthropic: Anthropic;
-  private transport: StdioClientTransport | null = null;
-  private tools: Tool[] = [];
-
-  constructor() {
-    this.anthropic = new Anthropic({
-      apiKey: ANTHROPIC_API_KEY,
-    });
-    this.mcp = new Client({ name: "mcp-client-cli", version: "1.0.0" });
-  }
-  // methods will go here
-}
-```
-
-### Server Connection Management
-
-Next, we'll implement the method to connect to an MCP server:
-
-```typescript
-async connectToServer(serverScriptPath: string) {
-  try {
-    const isJs = serverScriptPath.endsWith(".js");
-    const isPy = serverScriptPath.endsWith(".py");
-    if (!isJs && !isPy) {
-      throw new Error("Server script must be a .js or .py file");
-    }
-    const command = isPy
-      ? process.platform === "win32"
-        ? "python"
-        : "python3"
-      : process.execPath;
-    
-    this.transport = new StdioClientTransport({
-      command,
-      args: [serverScriptPath],
-    });
-    this.mcp.connect(this.transport);
-    
-    const toolsResult = await this.mcp.listTools();
-    this.tools = toolsResult.tools.map((tool) => {
-      return {
-        name: tool.name,
-        description: tool.description,
-        input_schema: tool.inputSchema,
-      };
-    });
-    console.log(
-      "Connected to server with tools:",
-      this.tools.map(({ name }) => name)
-    );
-  } catch (e) {
-    console.log("Failed to connect to MCP server: ", e);
-    throw e;
-  }
-}
-```
-
-### Query Processing Logic
-
-Now let's add the core functionality for processing queries and handling tool calls:
-
-```typescript
-async processQuery(query: string) {
-  const messages: MessageParam[] = [
-    {
-      role: "user",
-      content: query,
-    },
-  ];
-
-  const response = await this.anthropic.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 1000,
-    messages,
-    tools: this.tools,
-  });
-
-  const finalText = [];
-  const toolResults = [];
-
-  for (const content of response.content) {
-    if (content.type === "text") {
-      finalText.push(content.text);
-    } else if (content.type === "tool_use") {
-      const toolName = content.name;
-      const toolArgs = content.input as { [x: string]: unknown } | undefined;
-
-      const result = await this.mcp.callTool({
-        name: toolName,
-        arguments: toolArgs,
-      });
-      toolResults.push(result);
-      finalText.push(
-        `[Calling tool ${toolName} with args ${JSON.stringify(toolArgs)}]`
-      );
-
-      messages.push({
-        role: "user",
-        content: result.content as string,
-      });
-
-      const response = await this.anthropic.messages.create({
-        model: "claude-3-5-sonnet-20241022",
-        max_tokens: 1000,
-        messages,
-      });
-
-      finalText.push(
-        response.content[0].type === "text" ? response.content[0].text : ""
-      );
-    }
-  }
-
-  return finalText.join("\n");
-}
-```
-
-### Interactive Chat Interface
-
-Now we'll add the chat loop and cleanup functionality:
-
-```typescript
-async chatLoop() {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  try {
-    console.log("\nMCP Client Started!");
-    console.log("Type your queries or 'quit' to exit.");
-
-    while (true) {
-      const message = await rl.question("\nQuery: ");
-      if (message.toLowerCase() === "quit") {
-        break;
-      }
-      const response = await this.processQuery(message);
-      console.log("\n" + response);
-    }
-  } finally {
-    rl.close();
-  }
-}
-
-async cleanup() {
-  await this.mcp.close();
-}
-```
-
-### Main Entry Point
-
-Finally, we'll add the main execution logic:
-
-```typescript
-async function main() {
-  if (process.argv.length < 3) {
-    console.log("Usage: node index.ts <path_to_server_script>");
-    return;
-  }
-  const mcpClient = new MCPClient();
-  try {
-    await mcpClient.connectToServer(process.argv[2]);
-    await mcpClient.chatLoop();
-  } finally {
-    await mcpClient.cleanup();
-    process.exit(0);
-  }
-}
-
-main();
-```
-
-## Running the Client
-
-To run your client with any MCP server:
-
-```bash
-# Build TypeScript
-npm run build
-
-# Run the client
-node build/index.js path/to/server.py # python server
-node build/index.js path/to/build/index.js # node server
-```
-
-<Note>
-If you're continuing the weather tutorial from the server quickstart, your command might look something like this: `node build/index.js .../quickstart-resources/weather-server-typescript/build/index.js`
-</Note>
-
-**The client will:**
-1. Connect to the specified server
-2. List available tools
-3. Start an interactive chat session where you can:
-   - Enter queries
-   - See tool executions
-   - Get responses from Claude
-
-## How It Works
-
-When you submit a query:
-
-1. The client gets the list of available tools from the server
-2. Your query is sent to Claude along with tool descriptions
-3. Claude decides which tools (if any) to use
-4. The client executes any requested tool calls through the server
-5. Results are sent back to Claude
-6. Claude provides a natural language response
-7. The response is displayed to you
-
-## Best practices
-
-1. **Error Handling**
-   - Use TypeScript's type system for better error detection
-   - Wrap tool calls in try-catch blocks
-   - Provide meaningful error messages
-   - Gracefully handle connection issues
-
-2. **Security**
-   - Store API keys securely in `.env`
-   - Validate server responses
-   - Be cautious with tool permissions
-
-## Troubleshooting
-
-### Server Path Issues
-- Double-check the path to your server script is correct
-- Use the absolute path if the relative path isn't working
-- For Windows users, make sure to use forward slashes (/) or escaped backslashes (\\) in the path
-- Verify the server file has the correct extension (.js for Node.js or .py for Python)
-
-Example of correct path usage:
-```bash
-# Relative path
-node build/index.js ./server/build/index.js
-
-# Absolute path
-node build/index.js /Users/username/projects/mcp-server/build/index.js
-
-# Windows path (either format works)
-node build/index.js C:/projects/mcp-server/build/index.js
-node build/index.js C:\\projects\\mcp-server\\build\\index.js
-```
-
-### Response Timing
-- The first response might take up to 30 seconds to return
-- This is normal and happens while:
-  - The server initializes
-  - Claude processes the query
-  - Tools are being executed
-- Subsequent responses are typically faster
-- Don't interrupt the process during this initial waiting period
-
-### Common Error Messages
-
-If you see:
-- `Error: Cannot find module`: Check your build folder and ensure TypeScript compilation succeeded
-- `Connection refused`: Ensure the server is running and the path is correct
-- `Tool execution failed`: Verify the tool's required environment variables are set
-- `ANTHROPIC_API_KEY is not set`: Check your .env file and environment variables
-- `TypeError`: Ensure you're using the correct types for tool arguments
-
-</Tab>
-
-
-<Tab title="Java">
-
-<Note>
-This is a quickstart demo based on Spring AI MCP auto-configuration and boot starters.
-To learn how to create sync and async MCP Clients manually, consult the [Java SDK Client](/sdk/java/mcp-client) documentation
-</Note>
-
-This example demonstrates how to build an interactive chatbot that combines Spring AI's Model Context Protocol (MCP) with the [Brave Search MCP Server](https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search). The application creates a conversational interface powered by Anthropic's Claude AI model that can perform internet searches through Brave Search, enabling natural language interactions with real-time web data.
-[You can find the complete code for this tutorial here.](https://github.com/spring-projects/spring-ai-examples/tree/main/model-context-protocol/web-search/brave-chatbot)
-
-## System Requirements
-
-Before starting, ensure your system meets these requirements:
-- Java 17 or higher
-- Maven 3.6+
-- npx package manager
-- Anthropic API key (Claude)
-- Brave Search API key
-
-## Setting Up Your Environment
-
-1. Install npx (Node Package eXecute):
-   First, make sure to install [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
-   and then run:
-   ```bash
-   npm install -g npx
-   ```
-
-2. Clone the repository:
-   ```bash
-   git clone https://github.com/spring-projects/spring-ai-examples.git
-   cd model-context-protocol/brave-chatbot
-   ```
-
-3. Set up your API keys:
-   ```bash
-   export ANTHROPIC_API_KEY='your-anthropic-api-key-here'
-   export BRAVE_API_KEY='your-brave-api-key-here'
-   ```
-
-4. Build the application:
-   ```bash
-   ./mvnw clean install
-   ```
-
-5. Run the application using Maven:
-   ```bash
-   ./mvnw spring-boot:run
-   ```
-
-<Warning>
-Make sure you keep your `ANTHROPIC_API_KEY` and `BRAVE_API_KEY` keys secure!
-</Warning>
-
-
-## How it Works
-
-The application integrates Spring AI with the Brave Search MCP server through several components:
-
-### MCP Client Configuration
-
-1. Required dependencies in pom.xml:
-```xml
-<dependency>
-    <groupId>org.springframework.ai</groupId>
-    <artifactId>spring-ai-starter-mcp-client</artifactId>
-</dependency>
-<dependency>
-    <groupId>org.springframework.ai</groupId>
-    <artifactId>spring-ai-starter-model-anthropic</artifactId>
-</dependency>
-```
-
-2. Application properties (application.yml):
-```yml
-spring:
-  ai:
-    mcp:
-      client:
-        enabled: true
-        name: brave-search-client
-        version: 1.0.0
-        type: SYNC
-        request-timeout: 20s
-        stdio:
-          root-change-notification: true
-          servers-configuration: classpath:/mcp-servers-config.json
-    anthropic:
-      api-key: ${ANTHROPIC_API_KEY}
-```
-
-This activates the `spring-ai-starter-mcp-client` to create one or more `McpClient`s based on the provided server configuration.
-
-3. MCP Server Configuration (`mcp-servers-config.json`):
-```json
-{
-  "mcpServers": {
-    "brave-search": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-brave-search"
-      ],
-      "env": {
-        "BRAVE_API_KEY": "<PUT YOUR BRAVE API KEY>"
-      }
-    }
-  }
-}
-```
-
-### Chat Implementation
-
-The chatbot is implemented using Spring AI's ChatClient with MCP tool integration:
-
-```java
-var chatClient = chatClientBuilder
-    .defaultSystem("You are useful assistant, expert in AI and Java.")
-    .defaultTools((Object[]) mcpToolAdapter.toolCallbacks())
-    .defaultAdvisors(new MessageChatMemoryAdvisor(new InMemoryChatMemory()))
-    .build();
-```
-
-Key features:
-- Uses Claude AI model for natural language understanding
-- Integrates Brave Search through MCP for real-time web search capabilities
-- Maintains conversation memory using InMemoryChatMemory
-- Runs as an interactive command-line application
-
-### Build and run
-
-```bash
-./mvnw clean install
-java -jar ./target/ai-mcp-brave-chatbot-0.0.1-SNAPSHOT.jar
-```
-
-or
-
-```bash
-./mvnw spring-boot:run
-```
-
-The application will start an interactive chat session where you can ask questions. The chatbot will use Brave Search when it needs to find information from the internet to answer your queries.
-
-The chatbot can:
-- Answer questions using its built-in knowledge
-- Perform web searches when needed using Brave Search
-- Remember context from previous messages in the conversation
-- Combine information from multiple sources to provide comprehensive answers
-
-### Advanced Configuration
-
-The MCP client supports additional configuration options:
-
-- Client customization through `McpSyncClientCustomizer` or `McpAsyncClientCustomizer`
-- Multiple clients with multiple transport types: `STDIO` and `SSE` (Server-Sent Events)
-- Integration with Spring AI's tool execution framework
-- Automatic client initialization and lifecycle management
-
-For WebFlux-based applications, you can use the WebFlux starter instead:
-
-```xml
-<dependency>
-    <groupId>org.springframework.ai</groupId>
-    <artifactId>spring-ai-mcp-client-webflux-spring-boot-starter</artifactId>
-</dependency>
-```
-
-This provides similar functionality but uses a WebFlux-based SSE transport implementation, recommended for production deployments.
+### レスポンスタイミング
+- 最初のレスポンスには最大30秒かかる場合があります
+- これは以下の処理中に正常に発生します:
+  - サーバーの初期化
+  - Claudeによるクエリ処理
+  - ツールの実行
+- 後続のレスポンスは通常より高速です
+- この初期待機中にプロセスを中断しないでください
+
+### 一般的なエラーメッセージ
+
+以下のエラーが表示された場合:
+- `FileNotFoundError`: サーバーパスを確認します
+- `Connection refused`: サーバーが実行中でパスが正しいことを確認します
+- `Tool execution failed`: ツールの必要な環境変数が設定されていることを確認します
+- `Timeout error`: クライアント設定でタイムアウトを増やすことを検討します
 
 </Tab>
 
 <Tab title="Kotlin">
 
-[You can find the complete code for this tutorial here.](https://github.com/modelcontextprotocol/kotlin-sdk/tree/main/samples/kotlin-mcp-client)
+[このチュートリアルの完全なコードはこちらから確認できます](https://github.com/modelcontextprotocol/kotlin-sdk/tree/main/samples/kotlin-mcp-client)
 
-## System Requirements
+## システム要件
 
-Before starting, ensure your system meets these requirements:
-- Java 17 or higher
-- Anthropic API key (Claude)
+開始前に、以下のシステム要件を満たしていることを確認してください:
+- Java 17以上
+- Anthropic APIキー(Claude用)
 
-## Setting up your environment
+## 環境設定
 
-First, let's install `java` and `gradle` if you haven't already.
-You can download `java` from [official Oracle JDK website](https://www.oracle.com/java/technologies/downloads/).
-Verify your `java` installation:
+まず、`java`と`gradle`をインストールします（まだインストールしていない場合）。
+[公式Oracle JDKウェブサイト](https://www.oracle.com/java/technologies/downloads/)から`java`をダウンロードできます。
+`java`のインストールを確認します:
 ```bash
 java --version
 ```
 
-Now, let's create and set up your project:
+次に、プロジェクトを作成して設定します:
 
 <CodeGroup>
 ```bash MacOS/Linux
-# Create a new directory for our project
+# プロジェクトディレクトリを作成
 mkdir kotlin-mcp-client
 cd kotlin-mcp-client
 
-# Initialize a new kotlin project
+# 新しいKotlinプロジェクトを初期化
 gradle init
 ```
 
 ```powershell Windows
-# Create a new directory for our project
+# プロジェクトディレクトリを作成
 md kotlin-mcp-client
 cd kotlin-mcp-client
-# Initialize a new kotlin project
+# 新しいKotlinプロジェクトを初期化
 gradle init
 ```
 </CodeGroup>
 
-After running `gradle init`, you will be presented with options for creating your project.
-Select **Application** as the project type, **Kotlin** as the programming language, and **Java 17** as the Java version.
+`gradle init`を実行すると、プロジェクト作成のオプションが表示されます。
+プロジェクトタイプとして**Application**、プログラミング言語として**Kotlin**、Javaバージョンとして**Java 17**を選択してください。
 
-Alternatively, you can create a Kotlin application using the [IntelliJ IDEA project wizard](https://kotlinlang.org/docs/jvm-get-started.html).
+または、[IntelliJ IDEAプロジェクトウィザード](https://kotlinlang.org/docs/jvm-get-started.html)を使用してKotlinアプリケーションを作成することもできます。
 
-After creating the project, add the following dependencies:
+プロジェクトを作成したら、以下の依存関係を追加します:
 
 <CodeGroup>
 ```kotlin build.gradle.kts
@@ -1038,7 +471,7 @@ dependencies {
 ```
 </CodeGroup>
 
-Also, add the following plugins to your build script:
+また、ビルドスクリプトに以下のプラグインを追加します:
 <CodeGroup>
 ```kotlin build.gradle.kts
 plugins {
@@ -1053,24 +486,24 @@ plugins {
 ```
 </CodeGroup>
 
-## Setting up your API key
+## APIキーの設定
 
-You'll need an Anthropic API key from the [Anthropic Console](https://console.anthropic.com/settings/keys).
+[Anthropic Console](https://console.anthropic.com/settings/keys)からAnthropic APIキーを取得する必要があります。
 
-Set up your API key:
+APIキーを設定します:
 ```bash
 export ANTHROPIC_API_KEY='your-anthropic-api-key-here'
 ```
 
 <Warning>
-Make sure your keep your `ANTHROPIC_API_KEY` secure!
+`ANTHROPIC_API_KEY`は安全に保管してください！
 </Warning>
 
-## Creating the Client
+## クライアントの作成
 
-### Basic Client Structure
+### 基本的なクライアント構造
 
-First, let's create the basic client class:
+まず、基本的なクライアントクラスを作成します:
 
 ```kotlin
 class MCPClient : AutoCloseable {
@@ -1078,7 +511,7 @@ class MCPClient : AutoCloseable {
     private val mcp: Client = Client(clientInfo = Implementation(name = "mcp-client-cli", version = "1.0.0"))
     private lateinit var tools: List<ToolUnion>
 
-    // methods will go here
+    // メソッドはここに追加
 
     override fun close() {
         runBlocking {
@@ -1088,9 +521,9 @@ class MCPClient : AutoCloseable {
     }
 ```
 
-### Server connection management
+### サーバー接続管理
 
-Next, we'll implement the method to connect to an MCP server:
+次に、MCPサーバーに接続するメソッドを実装します:
 
 ```kotlin
 suspend fun connectToServer(serverScriptPath: String) {
@@ -1100,7 +533,7 @@ suspend fun connectToServer(serverScriptPath: String) {
                 "js" -> add("node")
                 "py" -> add(if (System.getProperty("os.name").lowercase().contains("win")) "python" else "python3")
                 "jar" -> addAll(listOf("java", "-jar"))
-                else -> throw IllegalArgumentException("Server script must be a .js, .py or .jar file")
+                else -> throw IllegalArgumentException("サーバースクリプトは.js、.pyまたは.jarファイルである必要があります")
             }
             add(serverScriptPath)
         }
@@ -1129,15 +562,15 @@ suspend fun connectToServer(serverScriptPath: String) {
                     .build()
             )
         } ?: emptyList()
-        println("Connected to server with tools: ${tools.joinToString(", ") { it.tool().get().name() }}")
+        println("サーバーに接続しました。利用可能なツール: ${tools.joinToString(", ") { it.tool().get().name() }}")
     } catch (e: Exception) {
-        println("Failed to connect to MCP server: $e")
+        println("MCPサーバーへの接続に失敗しました: $e")
         throw e
     }
 }
 ```
 
-Also create a helper function to convert from `JsonObject` to `JsonValue` for Anthropic:
+また、Anthropic用に`JsonObject`から`JsonValue`に変換するヘルパー関数を作成します:
 ```kotlin
 private fun JsonObject.toJsonValue(): JsonValue {
     val mapper = ObjectMapper()
@@ -1146,9 +579,9 @@ private fun JsonObject.toJsonValue(): JsonValue {
 }
 ```
 
-### Query processing logic
+### クエリ処理ロジック
 
-Now let's add the core functionality for processing queries and handling tool calls:
+クエリを処理し、ツール呼び出しを処理するコア機能を追加します:
 
 ```kotlin
 private val messageParamsBuilder: MessageCreateParams.Builder = MessageCreateParams.builder()
@@ -1184,7 +617,7 @@ suspend fun processQuery(query: String): String {
                     name = toolName,
                     arguments = toolArgs ?: emptyMap()
                 )
-                finalText.add("[Calling tool $toolName with args $toolArgs]")
+                finalText.add("[ツール $toolName を引数 $toolArgs で呼び出し中]")
 
                 messages.add(
                     MessageParam.builder()
@@ -1214,17 +647,17 @@ suspend fun processQuery(query: String): String {
 }
 ```
 
-### Interactive chat
+### インタラクティブチャット
 
-We'll add the chat loop:
+チャットループを追加します:
 
 ```kotlin
 suspend fun chatLoop() {
-    println("\nMCP Client Started!")
-    println("Type your queries or 'quit' to exit.")
+    println("\nMCPクライアントが起動しました！")
+    println("クエリを入力するか、'quit'で終了します。")
 
     while (true) {
-        print("\nQuery: ")
+        print("\nクエリ: ")
         val message = readLine() ?: break
         if (message.lowercase() == "quit") break
         val response = processQuery(message)
@@ -1233,13 +666,13 @@ suspend fun chatLoop() {
 }
 ```
 
-### Main entry point
+### メインエントリーポイント
 
-Finally, we'll add the main execution function:
+最後に、メイン実行関数を追加します:
 
 ```kotlin
 fun main(args: Array<String>) = runBlocking {
-    if (args.isEmpty()) throw IllegalArgumentException("Usage: java -jar <your_path>/build/libs/kotlin-mcp-client-0.1.0-all.jar <path_to_server_script>")
+    if (args.isEmpty()) throw IllegalArgumentException("使用方法: java -jar <your_path>/build/libs/kotlin-mcp-client-0.1.0-all.jar <サーバースクリプトのパス>")
     val serverPath = args.first()
     val client = MCPClient()
     client.use {
@@ -1249,34 +682,34 @@ fun main(args: Array<String>) = runBlocking {
 }
 ```
 
-## Running the client
+## クライアントの実行
 
-To run your client with any MCP server:
+任意のMCPサーバーでクライアントを実行します:
 
 ```bash
 ./gradlew build
 
-# Run the client
-java -jar build/libs/<your-jar-name>.jar path/to/server.jar # jvm server
-java -jar build/libs/<your-jar-name>.jar path/to/server.py # python server
-java -jar build/libs/<your-jar-name>.jar path/to/build/index.js # node server
+# クライアントを実行
+java -jar build/libs/<your-jar-name>.jar path/to/server.jar # jvmサーバー
+java -jar build/libs/<your-jar-name>.jar path/to/server.py # pythonサーバー
+java -jar build/libs/<your-jar-name>.jar path/to/build/index.js # nodeサーバー
 ```
 
 <Note>
-If you're continuing the weather tutorial from the server quickstart, your command might look something like this: `java -jar build/libs/kotlin-mcp-client-0.1.0-all.jar .../samples/weather-stdio-server/build/libs/weather-stdio-server-0.1.0-all.jar`
+サーバークイックスタートの天気チュートリアルを続ける場合、コマンドは次のようになります: `java -jar build/libs/kotlin-mcp-client-0.1.0-all.jar .../samples/weather-stdio-server/build/libs/weather-stdio-server-0.1.0-all.jar`
 </Note>
 
-**The client will:**
-1. Connect to the specified server
-2. List available tools
-3. Start an interactive chat session where you can:
-   - Enter queries
-   - See tool executions
-   - Get responses from Claude
+**クライアントは以下のことを行います:**
+1. 指定されたサーバーに接続します
+2. 利用可能なツールをリストアップします
+3. インタラクティブなチャットセッションを開始します:
+   - クエリを入力できます
+   - ツールの実行を確認できます
+   - Claudeからのレスポンスを取得できます
 
-## How it works
+## 動作の仕組み
 
-Here's a high-level workflow schema:
+以下は高レベルのワークフロー図です:
 
 ```mermaid
 ---
@@ -1290,288 +723,642 @@ sequenceDiagram
     participant MCP_Server as MCP Server
     participant Tools
 
-    User->>Client: Send query
-    Client<<->>MCP_Server: Get available tools
-    Client->>Claude: Send query with tool descriptions
-    Claude-->>Client: Decide tool execution
-    Client->>MCP_Server: Request tool execution
-    MCP_Server->>Tools: Execute chosen tools
-    Tools-->>MCP_Server: Return results
-    MCP_Server-->>Client: Send results
-    Client->>Claude: Send tool results
-    Claude-->>Client: Provide final response
-    Client-->>User: Display response
+    User->>Client: クエリを送信
+    Client<<->>MCP_Server: 利用可能なツールを取得
+    Client->>Claude: ツール説明と共にクエリを送信
+    Claude-->>Client: ツール実行を決定
+    Client->>MCP_Server: ツール実行をリクエスト
+    MCP_Server->>Tools: 選択されたツールを実行
+    Tools-->>MCP_Server: 結果を返す
+    MCP_Server-->>Client: 結果を送信
+    Client->>Claude: ツール結果を送信
+    Claude-->>Client: 最終レスポンスを提供
+    Client-->>User: レスポンスを表示
 ```
 
-When you submit a query:
-1. The client gets the list of available tools from the server
-2. Your query is sent to Claude along with tool descriptions
-3. Claude decides which tools (if any) to use
-4. The client executes any requested tool calls through the server
-5. Results are sent back to Claude
-6. Claude provides a natural language response
-7. The response is displayed to you
+クエリを送信すると:
+1. クライアントはサーバーから利用可能なツールのリストを取得します
+2. クエリがツールの説明と共にClaudeに送信されます
+3. Claudeは使用するツール(ある場合)を決定します
+4. クライアントはサーバーを通じて要求されたツール呼び出しを実行します
+5. 結果がClaudeに送り返されます
+6. Claudeは自然言語のレスポンスを提供します
+7. レスポンスが表示されます
 
-## Best practices
+## ベストプラクティス
 
-1. **Error Handling**
-   - Leverage Kotlin's type system to model errors explicitly
-   - Wrap external tool and API calls in `try-catch` blocks when exceptions are possible
-   - Provide clear and meaningful error messages
-   - Handle network timeouts and connection issues gracefully
+1. **エラーハンドリング**
+   - Kotlinの型システムを活用してエラーを明示的にモデル化します
+   - 例外が発生する可能性がある外部ツールやAPI呼び出しを`try-catch`ブロックで囲みます
+   - 明確で意味のあるエラーメッセージを提供します
+   - ネットワークタイムアウトや接続問題を適切に処理します
 
-2. **Security**
-   - Store API keys and secrets securely in `local.properties`, environment variables, or secret managers
-   - Validate all external responses to avoid unexpected or unsafe data usage
-   - Be cautious with permissions and trust boundaries when using tools
+2. **セキュリティ**
+   - APIキーやシークレットは`local.properties`、環境変数、またはシークレットマネージャーに安全に保管します
+   - 予期しないまたは安全でないデータ使用を避けるために、すべての外部レスポンスを検証します
+   - ツールを使用する際は、権限と信頼境界に注意します
 
-## Troubleshooting
+## トラブルシューティング
 
-### Server Path Issues
-- Double-check the path to your server script is correct
-- Use the absolute path if the relative path isn't working
-- For Windows users, make sure to use forward slashes (/) or escaped backslashes (\\) in the path
-- Make sure that the required runtime is installed (java for Java, npm for Node.js, or uv for Python)
-- Verify the server file has the correct extension (.jar for Java, .js for Node.js or .py for Python)
+### サーバーパス問題
+- サーバースクリプトへのパスを再確認します
+- 相対パスが機能しない場合は絶対パスを使用します
+- Windowsユーザーはフォワードスラッシュ(/)またはエスケープされたバックスラッシュ(\\)を使用します
+- 必要なランタイムがインストールされていることを確認します（Javaの場合はjava、Node.jsの場合はnpm、Pythonの場合はuv）
+- サーバーファイルの拡張子が正しいことを確認します（Javaの場合は.jar、Node.jsの場合は.js、Pythonの場合は.py）
 
-Example of correct path usage:
+正しいパス使用例:
 ```bash
-# Relative path
+# 相対パス
 java -jar build/libs/client.jar ./server/build/libs/server.jar
 
-# Absolute path
+# 絶対パス
 java -jar build/libs/client.jar /Users/username/projects/mcp-server/build/libs/server.jar
 
-# Windows path (either format works)
+# Windowsパス(どちらの形式でも動作)
 java -jar build/libs/client.jar C:/projects/mcp-server/build/libs/server.jar
 java -jar build/libs/client.jar C:\\projects\\mcp-server\\build\\libs\\server.jar
 ```
 
-### Response Timing
-- The first response might take up to 30 seconds to return
-- This is normal and happens while:
-  - The server initializes
-  - Claude processes the query
-  - Tools are being executed
-- Subsequent responses are typically faster
-- Don't interrupt the process during this initial waiting period
+### レスポンスタイミング
+- 最初のレスポンスには最大30秒かかる場合があります
+- これは以下の処理中に正常に発生します:
+  - サーバーの初期化
+  - Claudeによるクエリ処理
+  - ツールの実行
+- 後続のレスポンスは通常より高速です
+- この初期待機中にプロセスを中断しないでください
 
-### Common Error Messages
+### 一般的なエラーメッセージ
 
-If you see:
-- `Connection refused`: Ensure the server is running and the path is correct
-- `Tool execution failed`: Verify the tool's required environment variables are set
-- `ANTHROPIC_API_KEY is not set`: Check your environment variables
+以下のエラーが表示された場合:
+- `Connection refused`: サーバーが実行中でパスが正しいことを確認します
+- `Tool execution failed`: ツールの必要な環境変数が設定されていることを確認します
+- `ANTHROPIC_API_KEY is not set`: 環境変数を確認します
 
 </Tab>
 
-<Tab title="C#">
-[You can find the complete code for this tutorial here.](https://github.io/modelcontextprotocol/csharp-sdk/tree/main/samples/QuickstartClient)
+<Tab title="Java">
 
-## System Requirements
-Before starting, ensure your system meets these requirements:
-- .NET 8.0 or higher
-- Anthropic API key (Claude)
-- Windows, Linux, or MacOS
-
-## Setting up your environment
-
-First, create a new .NET project:
-```bash
-dotnet new console -n QuickstartClient
-cd QuickstartClient
-```
-
-Then, add the required dependencies to your project:
-```bash
-dotnet add package ModelContextProtocol --prerelease
-dotnet add package Anthropic.SDK
-dotnet add package Microsoft.Extensions.Hosting
-```
-
-## Setting up your API key
-You'll need an Anthropic API key from the [Anthropic Console](https://console.anthropic.com/settings/keys).
-
-```bash
-dotnet user-secrets init
-dotnet user-secrets set "ANTHROPIC_API_KEY" "<your key here>"
-```
-
-## Creating the Client
-### Basic Client Structure
-First, let's setup the basic client class:
-```csharp
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-
-var builder = Host.CreateEmptyApplicationBuilder(settings: null);
-
-builder.Configuration
-    .AddUserSecrets<Program>();
-```
-
-This creates the beginnings of a .NET console application that can read the API key from user secrets.
-
-Next, we'll setup the MCP Client:
-
-```csharp
-var (command, arguments) = args switch
-{
-    [var script] when script.EndsWith(".py") => ("python", script),
-    [var script] when script.EndsWith(".js") => ("node", script),
-    [var script] when Directory.Exists(script) || (File.Exists(script) && script.EndsWith(".csproj")) => ("dotnet", $"run --project {script} --no-build"),
-    _ => throw new NotSupportedException("An unsupported server script was provided. Supported scripts are .py, .js, or .csproj")
-};
-
-await using var mcpClient = await McpClientFactory.CreateAsync(new()
-{
-    Id = "demo-server",
-    Name = "Demo Server",
-    TransportType = TransportTypes.StdIo,
-    TransportOptions = new()
-    {
-        ["command"] = command,
-        ["arguments"] = arguments,
-    }
-});
-
-var tools = await mcpClient.ListToolsAsync();
-foreach (var tool in tools)
-{
-    Console.WriteLine($"Connected to server with tools: {tool.Name}");
-}
-```
 <Note>
-Be sure to add the `using` statements for the namespaces:
-```csharp
-using ModelContextProtocol.Client;
-using ModelContextProtocol.Protocol.Transport;
-```
+これはSpring AI MCP自動設定とブートスターターに基づくクイックスタートデモです。
+手動で同期/非同期MCPクライアントを作成する方法については、[Java SDKクライアント](/sdk/java/mcp-client)ドキュメントを参照してください
 </Note>
 
-This configures a MCP client that will connect to a server that is provided as a command line argument. It then lists the available tools from the connected server.
+この例では、Spring AIのModel Context Protocol (MCP)と[Brave Search MCP Server](https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search)を組み合わせた対話型チャットボットの構築方法を示します。このアプリケーションは、AnthropicのClaude AIモデルを活用した会話型インターフェースを作成し、Brave Searchを通じてインターネット検索を実行できるため、リアルタイムのウェブデータとの自然言語インタラクションが可能です。
+[このチュートリアルの完全なコードはこちらから確認できます](https://github.com/spring-projects/spring-ai-examples/tree/main/model-context-protocol/web-search/brave-chatbot)
 
-### Query processing logic
-Now let's add the core functionality for processing queries and handling tool calls:
+## システム要件
 
-```csharp
-using IChatClient anthropicClient = new AnthropicClient(new APIAuthentication(builder.Configuration["ANTHROPIC_API_KEY"]))
-    .Messages
-    .AsBuilder()
-    .UseFunctionInvocation()
-    .Build();
+開始前に、以下のシステム要件を満たしていることを確認してください:
+- Java 17以上
+- Maven 3.6+
+- npxパッケージマネージャ
+- Anthropic APIキー(Claude用)
+- Brave Search APIキー
 
-var options = new ChatOptions
+## 環境設定
+
+1. npx (Node Package eXecute)をインストール:
+   まず[npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)をインストールし、
+   次に以下を実行:
+   ```bash
+   npm install -g npx
+   ```
+
+2. リポジトリをクローン:
+   ```bash
+   git clone https://github.com/spring-projects/spring-ai-examples.git
+   cd model-context-protocol/brave-chatbot
+   ```
+
+3. APIキーを設定:
+   ```bash
+   export ANTHROPIC_API_KEY='your-anthropic-api-key-here'
+   export BRAVE_API_KEY='your-brave-api-key-here'
+   ```
+
+4. アプリケーションをビルド:
+   ```bash
+   ./mvnw clean install
+   ```
+
+5. Mavenを使用してアプリケーションを実行:
+   ```bash
+   ./mvnw spring-boot:run
+   ```
+
+<Warning>
+`ANTHROPIC_API_KEY`と`BRAVE_API_KEY`は安全に保管してください！
+</Warning>
+
+## 動作の仕組み
+
+このアプリケーションは、Spring AIとBrave Search MCPサーバーを以下のコンポーネントで統合します:
+
+### MCPクライアント設定
+
+1. pom.xmlに必要な依存関係:
+```xml
+<dependency>
+    <groupId>org.springframework.ai</groupId>
+    <artifactId>spring-ai-starter-mcp-client</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.ai</groupId>
+    <artifactId>spring-ai-starter-model-anthropic</artifactId>
+</dependency>
+```
+
+2. アプリケーションプロパティ(application.yml):
+```yml
+spring:
+  ai:
+    mcp:
+      client:
+        enabled: true
+        name: brave-search-client
+        version: 1.0.0
+        type: SYNC
+        request-timeout: 20s
+        stdio:
+          root-change-notification: true
+          servers-configuration: classpath:/mcp-servers-config.json
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY}
+```
+
+これにより、提供されたサーバー設定に基づいて1つ以上の`McpClient`を作成する`spring-ai-starter-mcp-client`が有効になります。
+
+3. MCPサーバー設定(`mcp-servers-config.json`):
+```json
 {
-    MaxOutputTokens = 1000,
-    ModelId = "claude-3-5-sonnet-20241022",
-    Tools = [.. tools]
-};
-
-while (true)
-{
-    Console.WriteLine("MCP Client Started!");
-    Console.WriteLine("Type your queries or 'quit' to exit.");
-
-    string? query = Console.ReadLine();
-
-    if (string.IsNullOrWhiteSpace(query))
-    {
-        continue;
+  "mcpServers": {
+    "brave-search": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-brave-search"
+      ],
+      "env": {
+        "BRAVE_API_KEY": "<PUT YOUR BRAVE API KEY>"
+      }
     }
-    if (string.Equals(query, "quit", StringComparison.OrdinalIgnoreCase))
+  }
+}
+```
+
+### チャット実装
+
+チャットボットは、Spring AIのChatClientとMCPツール統合を使用して実装されています:
+
+```java
+var chatClient = chatClientBuilder
+    .defaultSystem("You are useful assistant, expert in AI and Java.")
+    .defaultTools((Object[]) mcpToolAdapter.toolCallbacks())
+    .defaultAdvisors(new MessageChatMemoryAdvisor(new InMemoryChatMemory()))
+    .build();
+```
+
+主な機能:
+- 自然言語理解のためにClaude AIモデルを使用
+- MCPを通じてBrave Searchを統合し、リアルタイムのウェブ検索機能を提供
+- InMemoryChatMemoryを使用して会話メモリを維持
+- 対話型コマンドラインアプリケーションとして実行
+
+### ビルドと実行
+
+```bash
+./mvnw clean install
+java -jar ./target/ai-mcp-brave-chatbot-0.0.1-SNAPSHOT.jar
+```
+
+または
+
+```bash
+./mvnw spring-boot:run
+```
+
+アプリケーションは対話型チャットセッションを開始します。質問をすると、チャットボットは必要に応じてBrave Searchを使用してインターネットから情報を検索し、回答します。
+
+このチャットボットは以下のことができます:
+- 組み込みの知識を使用して質問に回答
+- 必要に応じてBrave Searchを使用してウェブ検索を実行
+- 以前のメッセージのコンテキストを記憶
+- 複数の情報源から得た情報を組み合わせて包括的な回答を提供
+
+### 高度な設定
+
+MCPクライアントは追加の設定オプションをサポートしています:
+
+- `McpSyncClientCustomizer`または`McpAsyncClientCustomizer`によるクライアントのカスタマイズ
+- `STDIO`と`SSE`(Server-Sent Events)の複数のトランスポートタイプを持つ複数のクライアント
+- Spring AIのツール実行フレームワークとの統合
+- 自動クライアント初期化とライフサイクル管理
+
+WebFluxベースのアプリケーションでは、代わりにWebFluxスターターを使用できます:
+
+```xml
+<dependency>
+    <groupId>org.springframework.ai</groupId>
+    <artifactId>spring-ai-mcp-client-webflux-spring-boot-starter</artifactId>
+</dependency>
+```
+
+これは同様の機能を提供しますが、WebFluxベースのSSEトランスポート実装を使用しており、本番環境でのデプロイに推奨されます。
+
+</Tab>
+
+<Tab title="Node">
+
+[このチュートリアルの完全なコードはこちらから確認できます](https://github.com/modelcontextprotocol/quickstart-resources/tree/main/mcp-client-typescript)
+
+## システム要件
+
+開始前に、以下のシステム要件を満たしていることを確認してください:
+- MacまたはWindowsコンピュータ
+- Node.js 17以上がインストールされていること
+- 最新バージョンの`npm`がインストールされていること
+- Anthropic APIキー(Claude用)
+
+## 環境設定
+
+まず、プロジェクトを作成して設定します:
+
+<CodeGroup>
+```bash MacOS/Linux
+# プロジェクトディレクトリを作成
+mkdir mcp-client-typescript
+cd mcp-client-typescript
+
+# npmプロジェクトを初期化
+npm init -y
+
+# 依存関係をインストール
+npm install @anthropic-ai/sdk @modelcontextprotocol/sdk dotenv
+
+# 開発用依存関係をインストール
+npm install -D @types/node typescript
+
+# ソースファイルを作成
+touch index.ts
+```
+
+```powershell Windows
+# プロジェクトディレクトリを作成
+md mcp-client-typescript
+cd mcp-client-typescript
+
+# npmプロジェクトを初期化
+npm init -y
+
+# 依存関係をインストール
+npm install @anthropic-ai/sdk @modelcontextprotocol/sdk dotenv
+
+# 開発用依存関係をインストール
+npm install -D @types/node typescript
+
+# ソースファイルを作成
+new-item index.ts
+```
+</CodeGroup>
+
+`package.json`を更新して`type: "module"`とビルドスクリプトを設定します:
+
+```json package.json
+{
+  "type": "module",
+  "scripts": {
+    "build": "tsc && chmod 755 build/index.js"
+  }
+}
+```
+
+プロジェクトのルートに`tsconfig.json`を作成します:
+
+```json tsconfig.json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "outDir": "./build",
+    "rootDir": "./",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["index.ts"],
+  "exclude": ["node_modules"]
+}
+```
+
+## APIキーの設定
+
+[Anthropic Console](https://console.anthropic.com/settings/keys)からAnthropic APIキーを取得する必要があります。
+
+.envファイルを作成してキーを保存します:
+
+```bash
+echo "ANTHROPIC_API_KEY=<your key here>" > .env
+```
+
+.gitignoreに.envを追加:
+```bash
+echo ".env" >> .gitignore
+```
+
+<Warning>
+`ANTHROPIC_API_KEY`は安全に保管してください！
+</Warning>
+
+## クライアントの作成
+
+### 基本的なクライアント構造
+
+まず、`index.ts`にインポートと基本的なクライアントクラスを設定します:
+
+```typescript
+import { Anthropic } from "@anthropic-ai/sdk";
+import {
+  MessageParam,
+  Tool,
+} from "@anthropic-ai/sdk/resources/messages/messages.mjs";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import readline from "readline/promises";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+if (!ANTHROPIC_API_KEY) {
+  throw new Error("ANTHROPIC_API_KEYが設定されていません");
+}
+
+class MCPClient {
+  private mcp: Client;
+  private anthropic: Anthropic;
+  private transport: StdioClientTransport | null = null;
+  private tools: Tool[] = [];
+
+  constructor() {
+    this.anthropic = new Anthropic({
+      apiKey: ANTHROPIC_API_KEY,
+    });
+    this.mcp = new Client({ name: "mcp-client-cli", version: "1.0.0" });
+  }
+  // メソッドはここに追加
+}
+```
+
+### サーバー接続管理
+
+次に、MCPサーバーに接続するメソッドを実装します:
+
+```typescript
+async connectToServer(serverScriptPath: string) {
+  try {
+    const isJs = serverScriptPath.endsWith(".js");
+    const isPy = serverScriptPath.endsWith(".py");
+    if (!isJs && !isPy) {
+      throw new Error("サーバースクリプトは.jsまたは.pyファイルである必要があります");
+    }
+    const command = isPy
+      ? process.platform === "win32"
+        ? "python"
+        : "python3"
+      : process.execPath;
+    
+    this.transport = new StdioClientTransport({
+      command,
+      args: [serverScriptPath],
+    });
+    this.mcp.connect(this.transport);
+    
+    const toolsResult = await this.mcp.listTools();
+    this.tools = toolsResult.tools.map((tool) => {
+      return {
+        name: tool.name,
+        description: tool.description,
+        input_schema: tool.inputSchema,
+      };
+    });
+    console.log(
+      "サーバーに接続しました。利用可能なツール:",
+      this.tools.map(({ name }) => name)
+    );
+  } catch (e) {
+    console.log("MCPサーバーへの接続に失敗しました: ", e);
+    throw e;
+  }
+}
+```
+
+### クエリ処理ロジック
+
+クエリを処理し、ツール呼び出しを処理するコア機能を追加します:
+
+```typescript
+async processQuery(query: string) {
+  const messages: MessageParam[] = [
     {
+      role: "user",
+      content: query,
+    },
+  ];
+
+  const response = await this.anthropic.messages.create({
+    model: "claude-3-5-sonnet-20241022",
+    max_tokens: 1000,
+    messages,
+    tools: this.tools,
+  });
+
+  const finalText = [];
+  const toolResults = [];
+
+  for (const content of response.content) {
+    if (content.type === "text") {
+      finalText.push(content.text);
+    } else if (content.type === "tool_use") {
+      const toolName = content.name;
+      const toolArgs = content.input as { [x: string]: unknown } | undefined;
+
+      const result = await this.mcp.callTool({
+        name: toolName,
+        arguments: toolArgs,
+      });
+      toolResults.push(result);
+      finalText.push(
+        `[ツール ${toolName} を引数 ${JSON.stringify(toolArgs)} で呼び出し中]`
+      );
+
+      messages.push({
+        role: "user",
+        content: result.content as string,
+      });
+
+      const response = await this.anthropic.messages.create({
+        model: "claude-3-5-sonnet-20241022",
+        max_tokens: 1000,
+        messages,
+      });
+
+      finalText.push(
+        response.content[0].type === "text" ? response.content[0].text : ""
+      );
+    }
+  }
+
+  return finalText.join("\n");
+}
+```
+
+### インタラクティブチャットインターフェース
+
+チャットループとクリーンアップ機能を追加します:
+
+```typescript
+async chatLoop() {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  try {
+    console.log("\nMCPクライアントが起動しました！");
+    console.log("クエリを入力するか、'quit'で終了します。");
+
+    while (true) {
+      const message = await rl.question("\nクエリ: ");
+      if (message.toLowerCase() === "quit") {
         break;
+      }
+      const response = await this.processQuery(message);
+      console.log("\n" + response);
     }
+  } finally {
+    rl.close();
+  }
+}
 
-    var response = anthropicClient.GetStreamingResponseAsync(query, options);
-
-    await foreach (var message in response)
-    {
-        Console.Write(message.Text);
-    }
-    Console.WriteLine();
+async cleanup() {
+  await this.mcp.close();
 }
 ```
 
-## Key Components Explained
+### メインエントリーポイント
 
-### 1. Client Initialization
-* The client is initialized using `McpClientFactory.CreateAsync()`, which sets up the transport type and command to run the server.
+最後に、メイン実行ロジックを追加します:
 
-### 2. Server Connection
-* Supports Python, Node.js, and .NET servers.
-* The server is started using the command specified in the arguments.
-* Configures to use stdio for communication with the server.
-* Initializes the session and available tools.
+```typescript
+async function main() {
+  if (process.argv.length < 3) {
+    console.log("使用方法: node index.ts <サーバースクリプトのパス>");
+    return;
+  }
+  const mcpClient = new MCPClient();
+  try {
+    await mcpClient.connectToServer(process.argv[2]);
+    await mcpClient.chatLoop();
+  } finally {
+    await mcpClient.cleanup();
+    process.exit(0);
+  }
+}
 
-### 3. Query Processing
-* Leverages [Microsoft.Extensions.AI](https://learn.microsoft.com/dotnet/ai/ai-extensions) for the chat client.
-* Configures the `IChatClient` to use automatic tool (function) invocation.
-* The client reads user input and sends it to the server.
-* The server processes the query and returns a response.
-* The response is displayed to the user.
-
-### Running the Client
-To run your client with any MCP server:
-```bash
-dotnet run -- path/to/server.csproj # dotnet server
-dotnet run -- path/to/server.py # python server
-dotnet run -- path/to/server.js # node server
+main();
 ```
+
+## クライアントの実行
+
+任意のMCPサーバーでクライアントを実行します:
+
+```bash
+# TypeScriptをビルド
+npm run build
+
+# クライアントを実行
+node build/index.js path/to/server.py # pythonサーバー
+node build/index.js path/to/build/index.js # nodeサーバー
+```
+
 <Note>
-If you're continuing the weather tutorial from the server quickstart, your command might look something like this: `dotnet run -- path/to/QuickstartWeatherServer`.
+サーバークイックスタートの天気チュートリアルを続ける場合、コマンドは次のようになります: `node build/index.js .../quickstart-resources/weather-server-typescript/build/index.js`
 </Note>
 
-The client will:
+**クライアントは以下のことを行います:**
+1. 指定されたサーバーに接続します
+2. 利用可能なツールをリストアップします
+3. インタラクティブなチャットセッションを開始します:
+   - クエリを入力できます
+   - ツールの実行を確認できます
+   - Claudeからのレスポンスを取得できます
 
-1. Connect to the specified server
-2. List available tools
-3. Start an interactive chat session where you can:
-   - Enter queries
-   - See tool executions
-   - Get responses from Claude
-4. Exit the session when done
+## 動作の仕組み
 
-Here's an example of what it should look like it connected to a weather server quickstart:
+クエリを送信すると:
 
-<Frame>
-  <img src="/images/quickstart-dotnet-client.png" />
-</Frame>
+1. クライアントはサーバーから利用可能なツールのリストを取得します
+2. クエリがツールの説明と共にClaudeに送信されます
+3. Claudeは使用するツール(ある場合)を決定します
+4. クライアントはサーバーを通じて要求されたツール呼び出しを実行します
+5. 結果がClaudeに送り返されます
+6. Claudeは自然言語のレスポンスを提供します
+7. レスポンスが表示されます
+
+## ベストプラクティス
+
+1. **エラーハンドリング**
+   - TypeScriptの型システムを使用してエラー検出を改善します
+   - ツール呼び出しをtry-catchブロックで囲みます
+   - 意味のあるエラーメッセージを提供します
+   - 接続問題を適切に処理します
+
+2. **セキュリティ**
+   - APIキーは安全に.envに保管します
+   - サーバーのレスポンスを検証します
+   - ツールの権限には注意します
+
+## トラブルシューティング
+
+### サーバーパス問題
+- サーバースクリプトへのパスを再確認します
+- 相対パスが機能しない場合は絶対パスを使用します
+- Windowsユーザーはフォワードスラッシュ(/)またはエスケープされたバックスラッシュ(\\)を使用します
+- サーバーファイルの拡張子が正しいことを確認します(.js for Node.jsまたは.py for Python)
+
+正しいパス使用例:
+```bash
+# 相対パス
+node build/index.js ./server/build/index.js
+
+# 絶対パス
+node build/index.js /Users/username/projects/mcp-server/build/index.js
+
+# Windowsパス(どちらの形式でも動作)
+node build/index.js C:/projects/mcp-server/build/index.js
+node build/index.js C:\\projects\\mcp-server\\build\\index.js
+```
+
+### レスポンスタイミング
+- 最初のレスポンスには最大30秒かかる場合があります
+- これは以下の処理中に正常に発生します:
+  - サーバーの初期化
+  - Claudeによるクエリ処理
+  - ツールの実行
+- 後続のレスポンスは通常より高速です
+- この初期待機中にプロセスを中断しないでください
+
+### 一般的なエラーメッセージ
+
+以下のエラーが表示された場合:
+- `Error: Cannot find module`: ビルドフォルダを確認し、TypeScriptコンパイルが成功したことを確認します
+- `Connection refused`: サーバーが実行中でパスが正しいことを確認します
+- `Tool execution failed`: ツールの必要な環境変数が設定されていることを確認します
+- `ANTHROPIC_API_KEY is not set`: .envファイルと環境変数を確認します
+- `TypeError`: ツール引数に正しい型を使用していることを確認します
 
 </Tab>
-
-</Tabs>
-
-## Next steps
-
-<CardGroup cols={2}>
-  <Card
-    title="Example servers"
-    icon="grid"
-    href="/examples"
-  >
-    Check out our gallery of official MCP servers and implementations
-  </Card>
-  <Card
-    title="Clients"
-    icon="cubes"
-    href="/clients"
-  >
-    View the list of clients that support MCP integrations
-  </Card>
-  <Card
-    title="Building MCP with LLMs"
-    icon="comments"
-    href="/tutorials/building-mcp-with-llms"
-  >
-    Learn how to use LLMs like Claude to speed up your MCP development
-  </Card>
-   <Card
-    title="Core architecture"
-    icon="sitemap"
-    href="/docs/concepts/architecture"
-  >
-    Understand how MCP connects clients, servers, and LLMs
-  </Card>
-</CardGroup>
